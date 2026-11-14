@@ -10,8 +10,8 @@ export function DataSheet({ onClose }: { onClose: () => void }) {
   const [pending, setPending] = useState<State | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const exportJSON = () => download(`timeledger-${stamp()}.json`, toJSON(state), 'application/json');
-  const exportCSV = () => download(`timeledger-${stamp()}.csv`, toCSV(state), 'text/csv');
+  const exportJSON = () => download(`hourwell-${stamp()}.json`, toJSON(state), 'application/json');
+  const exportCSV = () => download(`hourwell-${stamp()}.csv`, toCSV(state), 'text/csv');
 
   return (
     <Sheet title="Your data" onClose={onClose}>

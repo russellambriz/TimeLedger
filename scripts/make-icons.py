@@ -1,4 +1,4 @@
-"""Draw the TimeLedger home-screen icons and a film-grain tile."""
+"""Draw the Hourwell home-screen icons and a film-grain tile."""
 
 import math
 import random

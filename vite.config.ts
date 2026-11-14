@@ -11,8 +11,8 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
         id: '/TimeLedger/',
-        name: 'TimeLedger',
-        short_name: 'TimeLedger',
+        name: 'Hourwell — Focus Timer',
+        short_name: 'Hourwell — Focus Timer',
         description: 'One tap to focus. Track reading, homework, and deep work by day, week, and month.',
         theme_color: '#090908',
         background_color: '#090908',

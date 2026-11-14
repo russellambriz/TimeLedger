@@ -1,10 +1,17 @@
 import type { Category, State } from '../types';
 
+export const HOMEWORK_SUBJECTS: readonly Category[] = [
+  { id: 'homework-chemistry', name: 'Chemistry', color: '#8CA99B' },
+  { id: 'homework-math', name: 'Math', color: '#BAA0C7' },
+];
+export const isHomework = (id: string) => id === 'homework' || HOMEWORK_SUBJECTS.some(c => c.id === id);
+
 export const DEFAULT_CATEGORIES: readonly Category[] = [
   { id: 'focus', name: 'Focus', color: '#D4B896' },
   { id: 'reading', name: 'Reading', color: '#8CA99B' },
   { id: 'homework', name: 'Homework', color: '#9BAED0' },
   { id: 'deep-work', name: 'Deep Work', color: '#BAA0C7' },
+  ...HOMEWORK_SUBJECTS,
 ];
 
 export const PALETTE: readonly string[] = [
@@ -63,4 +70,15 @@ export function migrateFocus(state: State): State {
   if (!state.categories.some(c => LEGACY_CATEGORIES.has(c.id))) return state;
   return { ...state, categories: [...DEFAULT_CATEGORIES.filter(c => !state.categories.some(old => old.id === c.id)), ...state.categories],
     lastCategoryId: LEGACY_CATEGORIES.has(state.lastCategoryId) ? 'focus' : state.lastCategoryId };
+}
+
+export function migrateHomework(state: State): State {
+  if (!state.categories.some(c => c.id === 'homework')) return state;
+  const missing = HOMEWORK_SUBJECTS.filter(c => !state.categories.some(old => old.id === c.id));
+  return missing.length ? {...state, categories: [...state.categories, ...missing]} : state;
+}
+export function homeworkState(state: State, categoryId?: string): State {
+  const matches = (id: string) => categoryId ? id === categoryId : isHomework(id);
+  return {...state, sessions: state.sessions.filter(s => matches(s.categoryId)),
+    active: state.active && matches(state.active.categoryId) ? state.active : null};
 }

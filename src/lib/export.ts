@@ -38,10 +38,10 @@ export function fromJSON(text: string): ImportResult {
   try {
     parsed = JSON.parse(text);
   } catch {
-    return { ok: false, error: "That file isn't a TimeLedger backup." };
+    return { ok: false, error: "That file isn't a Hourwell backup." };
   }
   const state = parseState(parsed);
-  if (!state) return { ok: false, error: "That file isn't a TimeLedger backup." };
+  if (!state) return { ok: false, error: "That file isn't a Hourwell backup." };
   return { ok: true, state };
 }
 

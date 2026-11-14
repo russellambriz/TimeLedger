@@ -164,6 +164,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
 export function useStore(): StoreApi {
   const store = useContext(StoreContext);
-  if (!store) throw new Error('TimeLedger store is unavailable.');
+  if (!store) throw new Error('Hourwell store is unavailable.');
   return store;
 }

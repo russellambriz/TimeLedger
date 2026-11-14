@@ -1,4 +1,6 @@
-# TimeLedger
+# Hourwell
+
+**Make time for what matters.**
 
 A quiet, one-tap focus tracker for reading, homework, and deep work.
 
@@ -38,3 +40,5 @@ Development: http://localhost:5173/TimeLedger/
 Preview: http://localhost:4173/TimeLedger/
 
 Pushes to `main` test, build, and deploy to GitHub Pages using `.github/workflows/deploy.yml`.
+
+Hourwell was formerly called TimeLedger. The existing URL, installed-app identity, backup format, and storage key are retained so this branding update preserves saved sessions.

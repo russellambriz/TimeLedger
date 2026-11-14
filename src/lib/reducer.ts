@@ -1,4 +1,4 @@
-import { defaultState } from './defaults';
+import { defaultState, HOMEWORK_SUBJECTS } from './defaults';
 import type { State } from '../types';
 
 export type Action =
@@ -92,7 +92,7 @@ export function reducer(state: State, action: Action): State {
       const fallback = state.categories.find((item) => !item.archived && item.id !== target.id);
       if (!fallback) return state;
       const usedBySession = state.sessions.some((session) => session.categoryId === target.id);
-      const categories = usedBySession
+      const categories = (usedBySession || HOMEWORK_SUBJECTS.some(c => c.id === target.id))
         ? state.categories.map((item) => (item.id === target.id ? { ...item, archived: true } : item))
         : state.categories.filter((item) => item.id !== target.id);
       return {

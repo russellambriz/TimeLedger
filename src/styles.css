@@ -1058,3 +1058,13 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 }
 @media (max-width: 360px) { .quick-categories { gap: 5px; } .quick-categories button { padding: 0 10px; } .focus-intro p { font-size: 12px; } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+.homework-summary, .subject-totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.homework-summary { padding: 20px 0; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.homework-summary span, .subject-totals small { display: block; color: var(--faint); font-size: 11px; font-weight: 400; margin-bottom: 6px; }
+.homework-summary strong { font-family: var(--font-serif); font-size: 27px; font-weight: 500; color: var(--gold-soft); }
+.homework-subjects { display: grid; gap: 10px; margin: 12px 0 18px; }
+.homework-subject { border: 1px solid var(--line); border-radius: 16px; padding: 16px; text-align: left; }
+.homework-subject[aria-pressed='true'] { border-color: var(--gold-deep); background: #d4b8960c; }
+.subject-title { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; font-size: 17px; }
+.subject-check { margin-left: auto; color: var(--gold); font-size: 11px; }
+.subject-totals { font-size: 15px; color: var(--muted); }

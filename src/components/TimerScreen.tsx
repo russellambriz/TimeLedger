@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { selectedCategory, LEGACY_CATEGORIES } from '../lib/defaults';
+import { selectedCategory, LEGACY_CATEGORIES, HOMEWORK_SUBJECTS, isHomework } from '../lib/defaults';
 import { formatClock } from '../lib/format';
 import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
+import { HomeworkSheet } from './HomeworkSheet';
 import { StatRow } from './StatRow';
 
 export function TimerScreen() {
   const { state, now, start, stop, setCategory } = useStore();
   const [open, setOpen] = useState(false);
+  const [homeworkOpen, setHomeworkOpen] = useState(false);
   const category = selectedCategory(state);
   const running = state.active !== null;
   const elapsed = running && state.active ? Math.max(0, now - state.active.startedAt) : 0;
 
   return (
     <section className="timer">
-      <h1 className="brand">TimeLedger</h1>
+      <h1 className="brand">Hourwell</h1>
       <div className="focus-intro"><p className="eyebrow">A little more presence.</p><h2>{running ? "You’re making time." : "Make time for what matters."}</h2><p>{running ? "One thing at a time. You’re right where you need to be." : "Your book. Your studies. Your undivided attention."}</p></div>
       <StatRow now={now} />
       <div className="stage">
@@ -57,10 +59,11 @@ export function TimerScreen() {
           </svg>
         </button>
         <div className="quick-categories" aria-label="Focus activity">
-          {state.categories.filter(c => !c.archived && !LEGACY_CATEGORIES.has(c.id)).slice(0, 4).map(c => <button key={c.id} aria-pressed={category.id === c.id} onClick={() => setCategory(c.id)}>{c.name}</button>)}
+          {state.categories.filter(c => !c.archived && !LEGACY_CATEGORIES.has(c.id) && !HOMEWORK_SUBJECTS.some(subject => subject.id === c.id)).slice(0, 4).map(c => <button key={c.id} aria-pressed={category.id === c.id || (c.id === 'homework' && isHomework(category.id))} onClick={() => c.id === 'homework' ? setHomeworkOpen(true) : setCategory(c.id)}>{c.name}</button>)}
         </div>
         <p className="timer-caption">{running ? 'Tap once to finish. Your time is saved automatically.' : 'One tap to start. One tap to stop and save.'}</p>
       </div>
+      {homeworkOpen && <HomeworkSheet onClose={() => setHomeworkOpen(false)} />}
       {open && <CategorySheet onClose={() => setOpen(false)} />}
     </section>
   );
