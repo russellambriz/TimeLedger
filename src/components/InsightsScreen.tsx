@@ -6,6 +6,7 @@ import { addDays, startOfDay, startOfWeek, startOfMonth } from '../lib/time';
 import { useStore } from '../store';
 import type { State } from '../types';
 import { StackedChart, type ChartBar } from './StackedChart';
+import { FocusTimeline } from './FocusTimeline';
 import { StatRow } from './StatRow';
 
 const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -146,6 +147,7 @@ export function InsightsScreen() {
             )}
           </section>
         )}
+        {selected && <FocusTimeline key={selected.key} state={state} now={now} initialDay={mode === 'days' ? Number(selected.key) : (mode === 'weeks' ? startOfWeek(now) : startOfMonth(now)) === Number(selected.key) ? now : Number(selected.key)} />}
       </div>
     </section>
   );

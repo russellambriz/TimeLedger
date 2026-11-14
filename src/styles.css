@@ -1068,3 +1068,25 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .subject-title { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; font-size: 17px; }
 .subject-check { margin-left: auto; color: var(--gold); font-size: 11px; }
 .subject-totals { font-size: 15px; color: var(--muted); }
+.focus-timeline { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--line); }
+.timeline-heading, .timeline-day-title, .timeline-row-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.timeline-heading h2 { font: 500 34px var(--font-serif); margin: 0 0 12px; }
+.timeline-heading .eyebrow { font-size: 10px; letter-spacing: .18em; color: var(--gold); }
+.timeline-date { display: flex; align-items: end; justify-content: center; gap: 14px; margin: 24px 0; }
+.timeline-date button { width: 44px; height: 48px; font-size: 28px; color: var(--gold); }
+.timeline-date label span { display: block; margin-bottom: 7px; }
+.timeline-date input { min-height: 48px; max-width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; background: #12110f; font-size: 16px; }
+.timeline-day-title { flex-wrap: wrap; color: var(--gold-soft); }
+.timeline-day-title h3 { font-size: 16px; font-weight: 400; }
+.timeline-zone { line-height: 1.6; font-size: 11px; }
+.timeline-axis { display: flex; justify-content: space-between; margin: 24px 0 12px; font-size: 10px; color: var(--faint); }
+.timeline-session { width: 100%; display: block; text-align: left; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.timeline-session[aria-pressed='true'] { background: #d4b89609; }
+.timeline-row-label { font-size: 13px; }.timeline-row-label > span:first-child { display: flex; gap: 8px; align-items: center; }
+.timeline-track { display: block; height: 20px; margin: 12px 0 8px; border-radius: 6px; position: relative; overflow: hidden; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(25% - 1px), var(--line) calc(25% - 1px), var(--line) 25%), #ffffff05; }
+.timeline-track > span { display: block; position: absolute; height: 100%; min-width: 3px; max-width: 100%; border-radius: 4px; }
+.timeline-time { font-size: 11px; color: var(--faint); }
+.timeline-empty { padding: 24px 0; color: var(--faint); text-align: center; }
+.timeline-selection { padding: 20px; border: 1px solid var(--line); border-radius: 16px; margin-top: 18px; }
+.timeline-selection dl { display: grid; grid-template-columns: auto 1fr; gap: 12px; font-size: 13px; line-height: 1.5; }
+.timeline-selection dt { color: var(--faint); }.timeline-selection dd { margin: 0; overflow-wrap: anywhere; }

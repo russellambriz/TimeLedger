@@ -11,7 +11,7 @@ A quiet, one-tap focus tracker for reading, homework, and deep work.
 - Tap **Focus** to start immediately in your last activity. Tap **Stop & save** to finish and save the session.
 - Choose Reading, Homework, Deep Work, or a custom activity. Changing the activity while running relabels the entire current session.
 - Today, this week, and this month accumulate automatically, including the running session.
-- **Progress** shows daily, weekly, and monthly charts with activity breakdowns.
+- **Progress** shows daily, weekly, and monthly charts with activity breakdowns. Tap a daily bar or choose any date in the focus timeline to see when each session happened. Tap a session for its exact start, end, duration, and time zone. Overnight sessions appear on both days, counting only the time on each day.
 - **History** lets you add, edit, or delete sessions. Manual entries cannot overlap saved sessions or a running timer.
 - **History → Data** exports a JSON backup or CSV, or imports a JSON backup. Import replaces the device's ledger after confirmation.
 - Install on the home screen for offline use after the first successful load. A running timer survives reloads and closing the app because its start timestamp is saved.
