@@ -22,7 +22,7 @@ describe('local backup', () => {
     const store = memory();
     expect(saveState(running, store)).toBe(true);
     expect(loadState(store).active?.startedAt).toBe(running.active?.startedAt);
-    expect(store.getItem(STORAGE_KEY)).toContain('distraction');
+    expect(store.getItem(STORAGE_KEY)).toContain('focus');
 
     const imported = fromJSON(toJSON(running));
     expect(imported.ok).toBe(true);
@@ -35,7 +35,7 @@ describe('local backup', () => {
   it('falls back when storage is corrupt and rejects foreign files', () => {
     const store = memory();
     store.setItem(STORAGE_KEY, '{not json');
-    expect(loadState(store).categories.map((category) => category.id)).toContain('distraction');
+    expect(loadState(store).categories.map((category) => category.id)).toContain('focus');
     expect(fromJSON('{"app":"other","version":1,"categories":[],"sessions":[]}').ok).toBe(false);
     expect(parseState({ version: 2, categories: [], sessions: [] })).toBeNull();
   });

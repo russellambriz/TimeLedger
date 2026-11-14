@@ -5,7 +5,7 @@ export type Tab = 'timer' | 'insights' | 'history';
 const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
   {
     id: 'timer',
-    label: 'Timer',
+    label: 'Focus',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="7.25" fill="none" stroke="currentColor" strokeWidth="1.4" />
@@ -15,7 +15,7 @@ const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
   },
   {
     id: 'insights',
-    label: 'Insights',
+    label: 'Progress',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M5 16.5v-3M10 16.5V8M15 16.5v-5M20 16.5V5.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

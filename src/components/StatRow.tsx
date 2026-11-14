@@ -1,27 +1,19 @@
 import { formatDuration } from '../lib/format';
-import { todayTotal, weekTotal } from '../lib/stats';
+import { todayTotal, weekTotal, monthTotal } from '../lib/stats';
+import { focusState } from '../lib/defaults';
 import { useStore } from '../store';
-
 export function StatRow({ now }: { now: number }) {
   const { state } = useStore();
-  const live = state.active !== null;
-  const today = todayTotal(state, now);
-  const week = weekTotal(state, now);
-  return (
-    <div className="stat-row">
-      <div>
-        <div className="stat-label">Today</div>
-        <div className="stat-value" data-testid="today-total">
-          {formatDuration(today.total, live)}
-        </div>
-      </div>
-      <div className="stat-rule" aria-hidden="true" />
-      <div>
-        <div className="stat-label">This week</div>
-        <div className="stat-value" data-testid="week-total">
-          {formatDuration(week.total, live)}
-        </div>
-      </div>
-    </div>
-  );
+  const focus = focusState(state);
+  const periods = [
+    {label: 'Today', key: 'today', total: todayTotal(focus, now).total},
+    {label: 'This week', key: 'week', total: weekTotal(focus, now).total},
+    {label: 'This month', key: 'month', total: monthTotal(focus, now).total},
+  ];
+  return <div className="stat-row" aria-label="Focus totals">
+    {periods.map(({label, key, total}) => <div className="stat-card" key={key}>
+      <div className="stat-label">{label}</div>
+      <div className="stat-value" data-testid={`${key}-total`}>{formatDuration(total)}</div>
+    </div>)}
+  </div>;
 }

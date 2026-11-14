@@ -116,7 +116,9 @@ export function reducer(state: State, action: Action): State {
       };
     }
     case 'add-session': {
-      if (!(action.end > action.start)) return state;
+      if (!Number.isFinite(action.start) || !Number.isFinite(action.end) || !(action.end > action.start)) return state;
+      if (state.sessions.some(s => action.start < s.end && action.end > s.start)) return state;
+      if (state.active && action.end > state.active.startedAt) return state;
       if (!state.categories.some((item) => item.id === action.categoryId && !item.archived)) return state;
       if (state.sessions.some((session) => session.id === action.id)) return state;
       return {
@@ -134,7 +136,9 @@ export function reducer(state: State, action: Action): State {
       const start = action.start ?? current.start;
       const end = action.end ?? current.end;
       const categoryId = action.categoryId ?? current.categoryId;
-      if (!(end > start)) return state;
+      if (!Number.isFinite(start) || !Number.isFinite(end) || !(end > start)) return state;
+      if (state.sessions.some(s => s.id !== action.id && start < s.end && end > s.start)) return state;
+      if (state.active && end > state.active.startedAt) return state;
       if (!state.categories.some((item) => item.id === categoryId)) return state;
       if (start === current.start && end === current.end && categoryId === current.categoryId) return state;
       const sessions = state.sessions.slice();

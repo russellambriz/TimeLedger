@@ -13,7 +13,7 @@ export default defineConfig({
         id: '/TimeLedger/',
         name: 'TimeLedger',
         short_name: 'TimeLedger',
-        description: 'A private one-tap timer for distractions, health, and the hours in between.',
+        description: 'One tap to focus. Track reading, homework, and deep work by day, week, and month.',
         theme_color: '#090908',
         background_color: '#090908',
         display: 'standalone',

@@ -47,7 +47,7 @@ export function SessionSheet({
       ? updateSession(session.id, { categoryId, start, end })
       : addSession({ categoryId, start, end });
     if (!ok) {
-      setError('Could not save that session.');
+      setError('Could not save. Check for overlapping sessions or a device storage warning.');
       return;
     }
     onClose();

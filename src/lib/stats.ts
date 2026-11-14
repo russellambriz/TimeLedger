@@ -1,5 +1,5 @@
 import type { State } from '../types';
-import { addDays, startOfDay, startOfWeek } from './time';
+import { addDays, startOfDay, startOfWeek, startOfMonth, addMonths } from './time';
 
 export type Slice = {
   categoryId: string;
@@ -144,4 +144,14 @@ export function weekBuckets(state: State, now: number, count: number): Bucket[] 
     return emptyBucket(start, addDays(start, 7));
   });
   return fillBuckets(buckets, state, now, startOfWeek);
+}
+
+export function monthTotal(state: State, now: number): Total {
+  const start = startOfMonth(now); return totals(state, start, addMonths(start, 1), now);
+}
+export function monthBuckets(state: State, now: number, count = 6): Bucket[] {
+  const first = addMonths(now, 1 - count);
+  return fillBuckets(Array.from({length: count}, (_, i) => {
+    const start = addMonths(first, i); return emptyBucket(start, addMonths(start, 1));
+  }), state, now, startOfMonth);
 }

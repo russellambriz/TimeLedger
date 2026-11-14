@@ -9,6 +9,8 @@ type StoreApi = {
   state: State;
   now: number;
   toast: string | null;
+  saveError: boolean;
+  retrySave: () => void;
   start: () => void;
   stop: () => void;
   discard: () => void;
@@ -33,6 +35,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>(() => loadState());
   const [now, setNow] = useState(() => Date.now());
   const [toast, setToast] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState(false);
+  const pendingSave = useRef<State | null>(null);
   const ref = useRef(state);
   const toastTimer = useRef<number | null>(null);
   ref.current = state;
@@ -47,18 +51,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const commit = (next: State) => {
+    const saved = saveState(next);
+    setSaveError(!saved);
+    if (!saved) {
+      pendingSave.current = next;
+      notify('Could not save on this device. Please retry.');
+      return false;
+    }
+    pendingSave.current = null;
     ref.current = next;
     setState(next);
-    const saved = saveState(next);
-    if (!saved) notify('Could not save on this device.');
-    return saved;
+    return true;
   };
 
   const dispatch = (action: Action) => {
     const next = reducer(ref.current, action);
     if (next === ref.current) return null;
-    commit(next);
-    return next;
+    return commit(next) ? next : null;
   };
 
   useEffect(() => {
@@ -97,6 +106,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     state,
     now,
     toast,
+    saveError,
+    retrySave: () => { if (commit(pendingSave.current ?? ref.current)) notify("Saved on this device."); },
     start: () => {
       const startedAt = Date.now();
       setNow(startedAt);
@@ -134,7 +145,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'restore-category', id });
     },
     addSession: (input) => dispatch({ type: 'add-session', id: uid(), ...input }) !== null,
-    updateSession: (id, patch) => dispatch({ type: 'update-session', id, ...patch }) !== null,
+    updateSession: (id, patch) => {
+      const next = reducer(ref.current, { type: 'update-session', id, ...patch });
+      if (next === ref.current && ref.current.sessions.some(s => s.id === id && (s.start !== patch.start || s.end !== patch.end || s.categoryId !== patch.categoryId))) return false;
+      return commit(next);
+    },
     deleteSession: (id) => {
       dispatch({ type: 'delete-session', id });
     },

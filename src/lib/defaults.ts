@@ -1,12 +1,10 @@
 import type { Category, State } from '../types';
 
 export const DEFAULT_CATEGORIES: readonly Category[] = [
-  { id: 'distraction', name: 'Distraction', color: '#C4624E' },
-  { id: 'phone', name: 'Phone/Social', color: '#D4A054' },
-  { id: 'exercise', name: 'Exercise', color: '#7E9A62' },
-  { id: 'sleep', name: 'Sleep', color: '#7C90C0' },
-  { id: 'meditation', name: 'Meditation', color: '#B59BC8' },
-  { id: 'health', name: 'Health', color: '#6AADA0' },
+  { id: 'focus', name: 'Focus', color: '#D4B896' },
+  { id: 'reading', name: 'Reading', color: '#8CA99B' },
+  { id: 'homework', name: 'Homework', color: '#9BAED0' },
+  { id: 'deep-work', name: 'Deep Work', color: '#BAA0C7' },
 ];
 
 export const PALETTE: readonly string[] = [
@@ -52,4 +50,17 @@ export function lookupCategory(state: State, id: string): { name: string; color:
 export function nextColor(categories: readonly Category[]): string {
   const used = new Set(categories.map((category) => category.color.toUpperCase()));
   return PALETTE.find((color) => !used.has(color)) ?? PALETTE[categories.length % PALETTE.length];
+}
+
+// Original non-focus categories retain their history without inflating focus totals.
+export const LEGACY_CATEGORIES = new Set(['distraction', 'phone', 'exercise', 'sleep', 'meditation', 'health']);
+export function focusState(state: State): State {
+  return { ...state, sessions: state.sessions.filter(s => !LEGACY_CATEGORIES.has(s.categoryId)),
+    active: state.active && !LEGACY_CATEGORIES.has(state.active.categoryId) ? state.active : null };
+}
+export function migrateFocus(state: State): State {
+  if (state.categories.some(c => c.id === 'focus')) return state;
+  if (!state.categories.some(c => LEGACY_CATEGORIES.has(c.id))) return state;
+  return { ...state, categories: [...DEFAULT_CATEGORIES.filter(c => !state.categories.some(old => old.id === c.id)), ...state.categories],
+    lastCategoryId: LEGACY_CATEGORIES.has(state.lastCategoryId) ? 'focus' : state.lastCategoryId };
 }

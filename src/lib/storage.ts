@@ -1,4 +1,4 @@
-import { defaultState } from './defaults';
+import { defaultState, migrateFocus } from './defaults';
 import type { ActiveTimer, Category, Session, State } from '../types';
 
 export const STORAGE_KEY = 'timeledger.v1';
@@ -71,7 +71,7 @@ export function parseState(input: unknown): State | null {
     active = { ...active, categoryId: lastCategoryId };
   }
 
-  return { version: 1, categories, sessions, active, lastCategoryId };
+  return migrateFocus({ version: 1, categories, sessions, active, lastCategoryId });
 }
 
 export function loadState(storage: Pick<Storage, 'getItem'> = localStorage): State {

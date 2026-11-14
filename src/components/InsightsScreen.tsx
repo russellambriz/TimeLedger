@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { lookupCategory } from '../lib/defaults';
+import { lookupCategory, focusState } from '../lib/defaults';
 import { formatDuration, formatLongDay, formatMonthDay, formatWeekRange } from '../lib/format';
-import { dayBuckets, weekBuckets, type Bucket } from '../lib/stats';
-import { addDays, startOfDay, startOfWeek } from '../lib/time';
+import { dayBuckets, weekBuckets, monthBuckets, type Bucket } from '../lib/stats';
+import { addDays, startOfDay, startOfWeek, startOfMonth } from '../lib/time';
 import { useStore } from '../store';
 import type { State } from '../types';
 import { StackedChart, type ChartBar } from './StackedChart';
@@ -24,15 +24,17 @@ function toBars(buckets: Bucket[], markKey: number, labelOf: (bucket: Bucket) =>
 }
 
 export function InsightsScreen() {
-  const { state, now } = useStore();
-  const [mode, setMode] = useState<'days' | 'weeks'>('days');
+  const { state: ledger, now } = useStore();
+  const state = useMemo(() => focusState(ledger), [ledger]);
+  const [mode, setMode] = useState<'days' | 'weeks' | 'months'>('days');
   const [offset, setOffset] = useState(0);
   const [pinned, setPinned] = useState<number | null>(null);
   const currentWeek = startOfWeek(now);
   const weekStart = addDays(currentWeek, offset * 7);
-  const viewKey = mode === 'days' ? `days:${weekStart}` : 'weeks';
+  const viewKey = mode === 'days' ? `days:${weekStart}` : mode;
 
   const bars = useMemo(() => {
+    if (mode === 'months') return toBars(monthBuckets(state, now), startOfMonth(now), b => new Date(b.start).toLocaleDateString(undefined, {month: 'short'}), state);
     if (mode === 'weeks') {
       return toBars(weekBuckets(state, now, 8), startOfWeek(now), (bucket) => formatMonthDay(bucket.start), state);
     }
@@ -40,7 +42,7 @@ export function InsightsScreen() {
   }, [mode, now, state, weekStart]);
 
   const fallback = useMemo(() => {
-    if (mode === 'weeks') return Math.max(0, bars.length - 1);
+    if (mode !== 'days') return Math.max(0, bars.length - 1);
     const todayKey = String(startOfDay(now));
     const today = bars.findIndex((bar) => bar.key === todayKey);
     if (today >= 0) return today;
@@ -59,14 +61,14 @@ export function InsightsScreen() {
   const heading = selected
     ? mode === 'days'
       ? formatLongDay(Number(selected.key))
-      : formatWeekRange(Number(selected.key))
+      : mode === 'months' ? new Date(Number(selected.key)).toLocaleDateString(undefined, {month: 'long', year: 'numeric'}) : formatWeekRange(Number(selected.key))
     : '';
 
   return (
     <section className="insights">
       <div className="page">
         <header className="page-head">
-          <h1>Insights</h1>
+          <h1>Your focus, over time.</h1>
         </header>
         <StatRow now={now} />
         <div className="chart-head">
@@ -77,6 +79,7 @@ export function InsightsScreen() {
             <button type="button" role="tab" aria-selected={mode === 'weeks'} onClick={() => { setMode('weeks'); setPinned(null); }}>
               Weeks
             </button>
+            <button type="button" role="tab" aria-selected={mode === 'months'} onClick={() => { setMode('months'); setPinned(null); }}>Months</button>
           </div>
           {mode === 'days' ? (
             <div className="pager">
@@ -89,7 +92,7 @@ export function InsightsScreen() {
               </button>
             </div>
           ) : (
-            <p className="quiet pager-note">Last 8 weeks</p>
+            <p className="quiet pager-note">{mode === 'months' ? 'Last 6 months' : 'Last 8 weeks'}</p>
           )}
         </div>
         <div className="panel">
@@ -98,7 +101,7 @@ export function InsightsScreen() {
             bars={bars}
             active={active}
             onActive={setPinned}
-            label={mode === 'days' ? 'Daily totals by category' : 'Weekly totals by category'}
+            label={mode === 'days' ? 'Daily totals by category' : mode === 'months' ? 'Monthly focus totals by category' : 'Weekly focus totals by category'}
           />
           {legend.length > 0 && (
             <div className="legend">
@@ -113,7 +116,7 @@ export function InsightsScreen() {
         </div>
         {selected && (
           <section className="detail" aria-live="polite">
-            <p className="quiet">{mode === 'days' ? `Week · ${formatDuration(visibleTotal)}` : `Last 8 weeks · ${formatDuration(visibleTotal)}`}</p>
+            <p className="quiet">{mode === 'days' ? `Week · ${formatDuration(visibleTotal)}` : `${mode === 'months' ? 'Last 6 months' : 'Last 8 weeks'} · ${formatDuration(visibleTotal)}`}</p>
             <div className="detail-top">
               <h2>{heading}</h2>
               <p className="detail-total">{formatDuration(selected.total)}</p>

@@ -20,3 +20,10 @@ export function startOfWeek(ms: number): number {
   date.setDate(date.getDate() - mondayOffset);
   return date.getTime();
 }
+
+export function startOfMonth(ms: number): number {
+  const date = new Date(ms); date.setDate(1); date.setHours(0, 0, 0, 0); return date.getTime();
+}
+export function addMonths(ms: number, count: number): number {
+  const date = new Date(startOfMonth(ms)); date.setMonth(date.getMonth() + count); return date.getTime();
+}
