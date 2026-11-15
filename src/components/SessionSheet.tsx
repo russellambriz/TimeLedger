@@ -11,15 +11,26 @@ function floorMinute(ms: number): number {
 export function SessionSheet({
   session,
   onClose,
+  title,
+  note,
+  lockCategoryId,
+  defaultStart,
+  defaultEnd,
 }: {
   session: Session | null;
   onClose: () => void;
+  title?: string;
+  note?: string;
+  /** Save with this category and hide the category picker (used for sleep). */
+  lockCategoryId?: string;
+  defaultStart?: number;
+  defaultEnd?: number;
 }) {
   const { state, now, addSession, updateSession, deleteSession } = useStore();
   const choices = state.categories.filter((category) => !category.archived || category.id === session?.categoryId);
-  const initialEnd = floorMinute(now);
-  const [categoryId, setCategoryId] = useState(session?.categoryId ?? state.lastCategoryId);
-  const [startValue, setStartValue] = useState(toDatetimeLocal(session?.start ?? initialEnd - 30 * 60000));
+  const initialEnd = floorMinute(defaultEnd ?? now);
+  const [categoryId, setCategoryId] = useState(lockCategoryId ?? session?.categoryId ?? state.lastCategoryId);
+  const [startValue, setStartValue] = useState(toDatetimeLocal(session?.start ?? defaultStart ?? initialEnd - 30 * 60000));
   const [endValue, setEndValue] = useState(toDatetimeLocal(session?.end ?? initialEnd));
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -54,8 +65,9 @@ export function SessionSheet({
   };
 
   return (
-    <Sheet title={session ? 'Edit session' : 'Add session'} onClose={onClose}>
-      <div className="chips" role="listbox" aria-label="Category">
+    <Sheet title={title ?? (session ? 'Edit session' : 'Add session')} onClose={onClose}>
+      {note && <p className="sheet-copy">{note}</p>}
+      {!lockCategoryId && <div className="chips" role="listbox" aria-label="Category">
         {choices.map((category) => (
           <button
             key={category.id}
@@ -67,18 +79,18 @@ export function SessionSheet({
             {category.name}
           </button>
         ))}
-      </div>
+      </div>}
       <label className="field">
-        <span>Start</span>
+        <span>{lockCategoryId ? 'Went to sleep' : 'Start'}</span>
         <input type="datetime-local" step={1} value={startValue} onChange={(event) => setStartValue(event.target.value)} />
       </label>
       <label className="field">
-        <span>End</span>
+        <span>{lockCategoryId ? 'Woke up' : 'End'}</span>
         <input type="datetime-local" step={1} value={endValue} onChange={(event) => setEndValue(event.target.value)} />
       </label>
       {error && <p className="form-error">{error}</p>}
       <button type="button" className="btn-gold" onClick={save}>
-        Save session
+        Save
       </button>
       {session && !confirming && (
         <button type="button" className="text-btn danger delete-link" onClick={() => setConfirming(true)}>

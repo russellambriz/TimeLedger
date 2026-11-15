@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export type Tab = 'timer' | 'insights' | 'history';
+export type Tab = 'timer' | 'sleep' | 'insights' | 'history';
 
 const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
   {
@@ -10,6 +10,15 @@ const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="7.25" fill="none" stroke="currentColor" strokeWidth="1.4" />
         <path d="M12 8.4V12l2.3 1.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: 'sleep',
+    label: 'Sleep',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M18.5 14.4A7 7 0 0 1 9.6 5.5a7 7 0 1 0 8.9 8.9Z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       </svg>
     ),
   },

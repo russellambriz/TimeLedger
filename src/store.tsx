@@ -3,7 +3,8 @@ import { lookupCategory } from './lib/defaults';
 import { formatDuration } from './lib/format';
 import { reducer, type Action } from './lib/reducer';
 import { loadState, saveState, STORAGE_KEY } from './lib/storage';
-import type { State } from './types';
+import type { Session, State } from './types';
+import { SLEEP_CATEGORY } from './lib/defaults';
 
 type StoreApi = {
   state: State;
@@ -23,6 +24,12 @@ type StoreApi = {
   updateSession: (id: string, patch: { categoryId?: string; start?: number; end?: number }) => boolean;
   deleteSession: (id: string) => void;
   importState: (next: State) => void;
+  /** Start the sleep timer. Stops and saves a running focus session first. */
+  startSleep: () => void;
+  /** Stop the sleep timer and save the night. Returns the saved session. */
+  stopSleep: () => Session | null;
+  discardSleep: () => void;
+  setSleepGoal: (minutes: number) => void;
   /** Current state, readable outside React renders (used by sync). */
   getState: () => State;
   /** Apply a merged state from the cloud without treating it as a local change. */
@@ -118,6 +125,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     saveError,
     retrySave: () => { if (commit(pendingSave.current ?? ref.current)) notify("Saved on this device."); },
     start: () => {
+      if (ref.current.sleep) api.stopSleep();
       const startedAt = Date.now();
       setNow(startedAt);
       dispatch({ type: 'start', now: startedAt });
@@ -165,6 +173,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     importState: (next) => {
       const saved = commit(next);
       if (saved) notify(`Imported ${next.sessions.length} sessions.`);
+    },
+    startSleep: () => {
+      if (ref.current.active) api.stop();
+      const startedAt = Date.now();
+      setNow(startedAt);
+      if (dispatch({ type: 'sleep-start', now: startedAt })) notify('Sleep well.');
+    },
+    stopSleep: () => {
+      const id = uid();
+      const next = reducer(ref.current, { type: 'sleep-stop', now: Date.now(), id });
+      if (next === ref.current || !commit(next)) return null;
+      const session = next.sessions.find((item) => item.id === id && item.categoryId === SLEEP_CATEGORY.id) ?? null;
+      notify(session ? `Good morning · slept ${formatDuration(session.end - session.start)}` : 'Good morning.');
+      return session;
+    },
+    discardSleep: () => {
+      dispatch({ type: 'sleep-discard' });
+    },
+    setSleepGoal: (minutes) => {
+      dispatch({ type: 'set-sleep-goal', minutes });
     },
     getState: () => ref.current,
     applySynced: (next) => {
