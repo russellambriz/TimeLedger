@@ -35,6 +35,7 @@ Tap **Sign in to sync** on the Focus screen, enter your email, and tap **Sign in
 - Changes save on the device first and sync in the background (within about a second online, live via Supabase Realtime, plus every 30 seconds and when the app reopens). Changes made offline upload later.
 - Each session, activity, and the timer is synced as its own record; when two devices change the same record, the newest change wins. Deletions sync too.
 - Signing out keeps the data on that device.
+- **iPhone Home Screen app:** iPhone keeps a Home Screen app's storage separate from Safari, and email links always open in Safari. Sign in with the email link in Safari once, open **Sync → Save password**, then sign in inside the Home Screen app with **Password**.
 
 Sync uses [Supabase](https://supabase.com) (free plan). Each account can only read and write its own records (row-level security). The publishable key in `src/lib/cloud.ts` is meant to be public.
 

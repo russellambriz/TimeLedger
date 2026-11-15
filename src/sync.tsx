@@ -16,6 +16,10 @@ type SyncApi = {
   sendCode: (email: string) => Promise<string | null>;
   /** Returns an error message, or null when signed in. */
   verifyCode: (email: string, code: string) => Promise<string | null>;
+  /** Returns an error message, or null when signed in. */
+  signInWithPassword: (email: string, password: string) => Promise<string | null>;
+  /** Set or change the account password. Returns an error message, or null when saved. */
+  setPassword: (password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   syncNow: () => void;
 };
@@ -187,6 +191,28 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           token: code.replace(/\s/g, ''),
           type: 'email',
         });
+        return err ? message(err) : null;
+      } catch (err) {
+        return message(err);
+      }
+    },
+    signInWithPassword: async (email, password) => {
+      if (!cloud) return 'Still loading. Try again in a moment.';
+      try {
+        const { error: err } = await cloud.supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (!err) return null;
+        if (/invalid login credentials/i.test(err.message)) {
+          return 'Email or password is wrong. If you haven’t set a password yet, sign in with the email link first (in Safari), then set one.';
+        }
+        return message(err);
+      } catch (err) {
+        return message(err);
+      }
+    },
+    setPassword: async (password) => {
+      if (!cloud) return 'Still loading. Try again in a moment.';
+      try {
+        const { error: err } = await cloud.supabase.auth.updateUser({ password });
         return err ? message(err) : null;
       } catch (err) {
         return message(err);

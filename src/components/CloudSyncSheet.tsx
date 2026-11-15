@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { useSync, type SyncStatus } from '../sync';
 import { Sheet } from './Sheet';
 
+/** True inside an app added to the Home Screen (where iPhone keeps storage separate from Safari). */
+function isHomeScreenApp(): boolean {
+  const nav = navigator as Navigator & { standalone?: boolean };
+  return nav.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches === true;
+}
+
 export function statusLabel(status: SyncStatus, pending: number): string {
   switch (status) {
     case 'loading':
@@ -36,6 +42,10 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'link' | 'password'>(() => (isHomeScreenApp() ? 'password' : 'link'));
+  const [password, setPasswordValue] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordNote, setPasswordNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   if (sync.email) {
     return (
@@ -58,6 +68,40 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
         <button type="button" className="menu-row" onClick={sync.syncNow}>
           Sync now
         </button>
+        <form
+          className="password-form"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            if (newPassword.length < 6) {
+              setPasswordNote({ ok: false, text: 'Use at least 6 characters.' });
+              return;
+            }
+            setBusy(true);
+            const err = await sync.setPassword(newPassword);
+            setBusy(false);
+            setPasswordNote(err ? { ok: false, text: err } : { ok: true, text: 'Password saved. Use it to sign in on your other devices.' });
+            if (!err) setNewPassword('');
+          }}
+        >
+          <h3>Password</h3>
+          <p className="quiet">
+            Set a password to sign in where email links don’t work, like Hourwell on your iPhone Home Screen.
+          </p>
+          <label className="field">
+            <span>New password</span>
+            <input
+              type="password"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              placeholder="At least 6 characters"
+            />
+          </label>
+          {passwordNote && <p className={passwordNote.ok ? 'quiet ok-note' : 'form-error'}>{passwordNote.text}</p>}
+          <button type="submit" className="menu-row" disabled={busy}>
+            {busy ? 'Saving…' : 'Save password'}
+          </button>
+        </form>
         <button
           type="button"
           className="menu-row"
@@ -94,9 +138,51 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
     if (err) setError(err.includes('expired') || err.includes('invalid') ? 'That code didn’t work. Check it, or send a new one.' : err);
   };
 
+  const passwordSignIn = async () => {
+    setBusy(true);
+    setError(null);
+    const err = await sync.signInWithPassword(email, password);
+    setBusy(false);
+    if (err) setError(err);
+  };
+
   return (
     <Sheet title="Sync your devices" onClose={onClose}>
-      {step === 'email' ? (
+      <div className="segment sign-in-mode" role="tablist" aria-label="Sign-in method">
+        <button type="button" role="tab" aria-selected={mode === 'link'} onClick={() => { setMode('link'); setError(null); }}>
+          Email link
+        </button>
+        <button type="button" role="tab" aria-selected={mode === 'password'} onClick={() => { setMode('password'); setError(null); }}>
+          Password
+        </button>
+      </div>
+      {mode === 'password' ? (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void passwordSignIn();
+          }}
+        >
+          <p className="sheet-copy">
+            {isHomeScreenApp()
+              ? 'On iPhone, email links open in Safari, not this app. Sign in with your password here instead.'
+              : 'Sign in with the password you set in Sync.'}{' '}
+            No password yet? Sign in with the email link in Safari first, then tap Sync → Save password.
+          </p>
+          <label className="field">
+            <span>Email</span>
+            <input type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
+          </label>
+          <label className="field">
+            <span>Password</span>
+            <input type="password" autoComplete="current-password" value={password} onChange={(event) => setPasswordValue(event.target.value)} />
+          </label>
+          {error && <p className="form-error">{error}</p>}
+          <button type="submit" className="btn-gold" disabled={busy || !email.trim() || !password || sync.status === 'loading'}>
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+      ) : step === 'email' ? (
         <form
           onSubmit={(event) => {
             event.preventDefault();
