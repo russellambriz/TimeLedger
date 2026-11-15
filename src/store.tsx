@@ -23,6 +23,12 @@ type StoreApi = {
   updateSession: (id: string, patch: { categoryId?: string; start?: number; end?: number }) => boolean;
   deleteSession: (id: string) => void;
   importState: (next: State) => void;
+  /** Current state, readable outside React renders (used by sync). */
+  getState: () => State;
+  /** Apply a merged state from the cloud without treating it as a local change. */
+  applySynced: (next: State) => boolean;
+  /** Listen for local changes. Returns an unsubscribe function. */
+  onLocalChange: (listener: (prev: State, next: State) => void) => () => void;
 };
 
 const StoreContext = createContext<StoreApi | null>(null);
@@ -39,6 +45,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const pendingSave = useRef<State | null>(null);
   const ref = useRef(state);
   const toastTimer = useRef<number | null>(null);
+  const listeners = useRef(new Set<(prev: State, next: State) => void>());
   ref.current = state;
 
   const notify = (message: string) => {
@@ -59,8 +66,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return false;
     }
     pendingSave.current = null;
+    const prev = ref.current;
     ref.current = next;
     setState(next);
+    if (prev !== next) for (const listener of listeners.current) listener(prev, next);
     return true;
   };
 
@@ -156,6 +165,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     importState: (next) => {
       const saved = commit(next);
       if (saved) notify(`Imported ${next.sessions.length} sessions.`);
+    },
+    getState: () => ref.current,
+    applySynced: (next) => {
+      if (next === ref.current) return true;
+      if (!saveState(next)) return false;
+      ref.current = next;
+      setState(next);
+      return true;
+    },
+    onLocalChange: (listener) => {
+      listeners.current.add(listener);
+      return () => listeners.current.delete(listener);
     },
   };
 
