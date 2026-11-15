@@ -1090,3 +1090,6 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .timeline-selection { padding: 20px; border: 1px solid var(--line); border-radius: 16px; margin-top: 18px; }
 .timeline-selection dl { display: grid; grid-template-columns: auto 1fr; gap: 12px; font-size: 13px; line-height: 1.5; }
 .timeline-selection dt { color: var(--faint); }.timeline-selection dd { margin: 0; overflow-wrap: anywhere; }
+
+.cloud-shortcut {display:block;margin:-8px auto 18px;font-size:11px;letter-spacing:.06em;}
+a.cloud-link {display:block;text-decoration:none;color:var(--ink);}

@@ -5,10 +5,12 @@ import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
 import { HomeworkSheet } from './HomeworkSheet';
 import { StatRow } from './StatRow';
+import { CloudSyncSheet } from './CloudSyncSheet';
 
 export function TimerScreen() {
   const { state, now, start, stop, setCategory } = useStore();
   const [open, setOpen] = useState(false);
+  const [cloudOpen,setCloudOpen]=useState(false);
   const [homeworkOpen, setHomeworkOpen] = useState(false);
   const category = selectedCategory(state);
   const running = state.active !== null;
@@ -17,6 +19,7 @@ export function TimerScreen() {
   return (
     <section className="timer">
       <h1 className="brand">Hourwell</h1>
+      <button className="text-btn cloud-shortcut" onClick={()=>setCloudOpen(true)}>Sync across devices ↗</button>
       <div className="focus-intro"><p className="eyebrow">A little more presence.</p><h2>{running ? "You’re making time." : "Make time for what matters."}</h2><p>{running ? "One thing at a time. You’re right where you need to be." : "Your book. Your studies. Your undivided attention."}</p></div>
       <StatRow now={now} />
       <div className="stage">
@@ -63,6 +66,7 @@ export function TimerScreen() {
         </div>
         <p className="timer-caption">{running ? 'Tap once to finish. Your time is saved automatically.' : 'One tap to start. One tap to stop and save.'}</p>
       </div>
+      {cloudOpen && <CloudSyncSheet onClose={()=>setCloudOpen(false)} />}
       {homeworkOpen && <HomeworkSheet onClose={() => setHomeworkOpen(false)} />}
       {open && <CategorySheet onClose={() => setOpen(false)} />}
     </section>

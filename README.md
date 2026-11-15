@@ -42,3 +42,11 @@ Preview: http://localhost:4173/TimeLedger/
 Pushes to `main` test, build, and deploy to GitHub Pages using `.github/workflows/deploy.yml`.
 
 Hourwell was formerly called TimeLedger. The existing URL, installed-app identity, backup format, and storage key are retained so this branding update preserves saved sessions.
+
+## Cloud sync
+
+[Open Hourwell Cloud](https://hourwell-focus-cloud.latterbag5.chatgpt.site/) and sign in with the same ChatGPT account on each device. The cloud version is currently private to the owner. It syncs completed sessions, subjects, exact timestamps, graphs, and the active timer.
+
+The GitHub Pages version remains local-only. Use **Sync across devices** on its Focus screen to export a JSON backup, then import it in the cloud version through the account menu. Finish any active local timer first. Import adds finished sessions without replacing existing cloud history. Use the cloud link for all future tracking.
+
+Cloud source is retained in the hosted project's managed Git repository, project `appgprj_6af8bc79bad08191a80c2e01a3ead11d`. It uses authenticated account-scoped D1 records, atomic revision checks, idempotent operation receipts, and a persistent offline queue. Forty automated tests cover tracking, timestamps, concurrent edits, account isolation, lost replies, and offline recovery.
