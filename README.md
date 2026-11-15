@@ -28,7 +28,7 @@ Records are always saved first in localStorage (`timeledger.v1`) on this browser
 
 ## Cloud sync
 
-Tap **Sign in to sync** on the Focus screen, enter your email, and type the code you receive. Sign in with the same email on each phone, tablet, or computer. Sessions, activities, and the running timer then stay in step across devices:
+Tap **Sign in to sync** on the Focus screen, enter your email, and tap **Sign in** in the email you receive (open it on the device you are signing in). Sign in with the same email on each phone, tablet, or computer. Sessions, activities, and the running timer then stay in step across devices:
 
 - Everything already on a device uploads automatically the first time it signs in.
 - Changes save on the device first and sync in the background (within about a second online, live via Supabase Realtime, plus every 30 seconds and when the app reopens). Changes made offline upload later.
@@ -40,10 +40,9 @@ Sync uses [Supabase](https://supabase.com) (free plan). Each account can only re
 ### One-time Supabase setup
 
 1. **SQL Editor → New query**: paste all of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
-2. **Authentication → Emails → Templates**: in both **Magic Link** and **Confirm signup**, add the line `Your code: {{ .Token }}` so emails include the sign-in code.
-3. **Authentication → URL Configuration**: set **Site URL** to `https://russellambriz.github.io/TimeLedger/` and add the same address under **Redirect URLs**.
+2. **Authentication → URL Configuration**: set **Site URL** to `https://russellambriz.github.io/TimeLedger/` and add the same address under **Redirect URLs**.
 
-Supabase's built-in email sender allows only a few emails per hour, which is fine for personal use.
+Supabase's built-in email sender allows only a few emails per hour, which is fine for personal use. (Optional: with custom SMTP you can add `{{ .Token }}` to the Magic Link template; the app also accepts a typed code.)
 
 ## Development
 

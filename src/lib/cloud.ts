@@ -8,7 +8,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://thszqceytojat
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || 'sb_publishable_PT68NOaP565u58_tgKdszA_SX8meuQD';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'hourwell.auth' },
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit', storageKey: 'hourwell.auth' },
 });
 
 const PAGE = 1000;

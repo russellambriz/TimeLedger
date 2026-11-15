@@ -34,6 +34,7 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [busy, setBusy] = useState(false);
+  const [showCode, setShowCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (sync.email) {
@@ -103,7 +104,7 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
           }}
         >
           <p className="sheet-copy">
-            Keep your focus time together on your phone, iPad, and computer. We’ll email you a sign-in code. No password
+            Keep your focus time together on your phone, iPad, and computer. We’ll email you a sign-in link. No password
             needed. Everything already on this device comes with you.
           </p>
           <label className="field">
@@ -119,7 +120,7 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
           </label>
           {error && <p className="form-error">{error}</p>}
           <button type="submit" className="btn-gold" disabled={busy || sync.status === 'loading'}>
-            {busy ? 'Sending…' : 'Email me a code'}
+            {busy ? 'Sending…' : 'Email me a sign-in link'}
           </button>
         </form>
       ) : (
@@ -130,26 +131,36 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
           }}
         >
           <p className="sheet-copy">
-            We sent a code to <strong>{email.trim()}</strong>. Enter it here. It can take a minute to arrive, so check
-            spam too.
+            We sent an email to <strong>{email.trim()}</strong>. Open it <strong>on this device</strong> and tap{' '}
+            <strong>Sign in</strong>. Hourwell opens signed in and starts syncing. It can take a minute to arrive, so
+            check spam too.
           </p>
-          <label className="field">
-            <span>Code</span>
-            <input
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              value={code}
-              onChange={(event) => setCode(event.target.value.replace(/[^\d]/g, '').slice(0, 10))}
-              placeholder="123456"
-            />
-          </label>
+          {!showCode && (
+            <button type="button" className="text-btn" onClick={() => setShowCode(true)}>
+              Email has a code instead?
+            </button>
+          )}
+          {showCode && (
+            <label className="field">
+              <span>Code</span>
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/[^\d]/g, '').slice(0, 10))}
+                placeholder="123456"
+              />
+            </label>
+          )}
           {error && <p className="form-error">{error}</p>}
-          <button type="submit" className="btn-gold" disabled={busy || code.length < 6}>
-            {busy ? 'Checking…' : 'Sign in'}
-          </button>
+          {showCode && (
+            <button type="submit" className="btn-gold" disabled={busy || code.length < 6}>
+              {busy ? 'Checking…' : 'Sign in'}
+            </button>
+          )}
           <div className="confirm">
             <button type="button" className="text-btn" disabled={busy} onClick={() => void sendCode()}>
-              Send a new code
+              Send again
             </button>
             <button
               type="button"
