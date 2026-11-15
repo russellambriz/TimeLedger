@@ -19,7 +19,7 @@ export function TimerScreen() {
   return (
     <section className="timer">
       <h1 className="brand">Hourwell</h1>
-      <button className="text-btn cloud-shortcut" onClick={()=>setCloudOpen(true)}>Sync across devices ↗</button>
+      <button className="text-btn cloud-shortcut" onClick={()=>setCloudOpen(true)}>Sign in to sync</button>
       <div className="focus-intro"><p className="eyebrow">A little more presence.</p><h2>{running ? "You’re making time." : "Make time for what matters."}</h2><p>{running ? "One thing at a time. You’re right where you need to be." : "Your book. Your studies. Your undivided attention."}</p></div>
       <StatRow now={now} />
       <div className="stage">
