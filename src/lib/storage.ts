@@ -1,5 +1,8 @@
 import { defaultState, migrateFocus, migrateHomework } from './defaults';
-import type { ActiveTimer, Category, Session, State } from '../types';
+import type { ActiveTimer, Category, Session, SleepTimer, State } from '../types';
+
+export const MIN_SLEEP_GOAL = 240;
+export const MAX_SLEEP_GOAL = 720;
 
 export const STORAGE_KEY = 'timeledger.v1';
 
@@ -71,7 +74,22 @@ export function parseState(input: unknown): State | null {
     active = { ...active, categoryId: lastCategoryId };
   }
 
-  return migrateHomework(migrateFocus({ version: 1, categories, sessions, active, lastCategoryId }));
+  let sleep: SleepTimer | null = null;
+  if (isRecord(input.sleep)) {
+    const startedAt = input.sleep.startedAt;
+    if (typeof startedAt === 'number' && Number.isFinite(startedAt) && startedAt > Date.UTC(2000, 0, 1) && startedAt <= Date.now() + 60_000) {
+      sleep = { startedAt };
+    }
+  }
+  const sleepGoal =
+    typeof input.sleepGoal === 'number' && input.sleepGoal >= MIN_SLEEP_GOAL && input.sleepGoal <= MAX_SLEEP_GOAL
+      ? Math.round(input.sleepGoal)
+      : undefined;
+
+  const base: State = { version: 1, categories, sessions, active, lastCategoryId };
+  if (sleep) base.sleep = sleep;
+  if (sleepGoal !== undefined) base.sleepGoal = sleepGoal;
+  return migrateHomework(migrateFocus(base));
 }
 
 export function loadState(storage: Pick<Storage, 'getItem'> = localStorage): State {

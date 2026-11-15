@@ -17,10 +17,18 @@ export type ActiveTimer = {
   categoryId: string;
 };
 
+export type SleepTimer = {
+  startedAt: number;
+};
+
 export type State = {
   version: 1;
   categories: Category[];
   sessions: Session[];
   active: ActiveTimer | null;
   lastCategoryId: string;
+  /** Running sleep timer (separate from the focus timer). */
+  sleep?: SleepTimer | null;
+  /** Nightly sleep goal in minutes. */
+  sleepGoal?: number;
 };

@@ -1,4 +1,5 @@
-import { defaultState, HOMEWORK_SUBJECTS } from './defaults';
+import { defaultState, HOMEWORK_SUBJECTS, SLEEP_CATEGORY } from './defaults';
+import { MAX_SLEEP_GOAL, MIN_SLEEP_GOAL } from './storage';
 import type { State } from '../types';
 
 export type Action =
@@ -13,9 +14,18 @@ export type Action =
   | { type: 'add-session'; id: string; categoryId: string; start: number; end: number }
   | { type: 'update-session'; id: string; categoryId?: string; start?: number; end?: number }
   | { type: 'delete-session'; id: string }
+  | { type: 'sleep-start'; now: number }
+  | { type: 'sleep-stop'; now: number; id: string }
+  | { type: 'sleep-discard' }
+  | { type: 'set-sleep-goal'; minutes: number }
   | { type: 'replace'; state: State };
 
 const COLOR = /^#[0-9A-Fa-f]{6}$/;
+
+function withSleepCategory(state: State): State {
+  if (state.categories.some((item) => item.id === SLEEP_CATEGORY.id)) return state;
+  return { ...state, categories: [...state.categories, { ...SLEEP_CATEGORY }] };
+}
 
 function activeCategories(state: State) {
   return state.categories.filter((category) => !category.archived);
@@ -148,6 +158,27 @@ export function reducer(state: State, action: Action): State {
     case 'delete-session': {
       if (!state.sessions.some((session) => session.id === action.id)) return state;
       return { ...state, sessions: state.sessions.filter((session) => session.id !== action.id) };
+    }
+    case 'sleep-start': {
+      if (state.sleep) return state;
+      return { ...withSleepCategory(state), sleep: { startedAt: action.now } };
+    }
+    case 'sleep-stop': {
+      if (!state.sleep) return state;
+      const sessions = state.sessions.slice();
+      if (action.now > state.sleep.startedAt && !sessions.some((session) => session.id === action.id)) {
+        sessions.push({ id: action.id, categoryId: SLEEP_CATEGORY.id, start: state.sleep.startedAt, end: action.now });
+      }
+      return { ...withSleepCategory(state), sleep: null, sessions };
+    }
+    case 'sleep-discard': {
+      if (!state.sleep) return state;
+      return { ...state, sleep: null };
+    }
+    case 'set-sleep-goal': {
+      const minutes = Math.round(action.minutes);
+      if (!(minutes >= MIN_SLEEP_GOAL && minutes <= MAX_SLEEP_GOAL) || minutes === state.sleepGoal) return state;
+      return { ...state, sleepGoal: minutes };
     }
     case 'replace':
       return action.state;

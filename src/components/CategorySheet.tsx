@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { nextColor, PALETTE } from '../lib/defaults';
+import { nextColor, PALETTE, SLEEP_CATEGORY } from '../lib/defaults';
 import { useStore } from '../store';
 import { Sheet } from './Sheet';
 
@@ -48,7 +48,7 @@ export function CategorySheet({ onClose }: { onClose: () => void }) {
       </div>
       <ul className="cat-list">
         {state.categories
-          .filter((category) => !category.archived)
+          .filter((category) => !category.archived && category.id !== SLEEP_CATEGORY.id)
           .map((category) =>
             editing ? (
               <li key={category.id} className="cat-edit">
@@ -105,7 +105,7 @@ export function CategorySheet({ onClose }: { onClose: () => void }) {
         <div className="removed-block">
           <p className="quiet">Removed</p>
           {state.categories
-            .filter((category) => category.archived)
+            .filter((category) => category.archived && category.id !== SLEEP_CATEGORY.id)
             .map((category) => (
               <div key={category.id} className="cat-edit-row">
                 <span className="dot" style={{ background: category.color }} />

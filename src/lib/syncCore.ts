@@ -49,7 +49,12 @@ function sameCategory(a: Category, b: Category) {
 }
 
 function settingsOf(state: State) {
-  return { active: state.active, lastCategoryId: state.lastCategoryId };
+  return {
+    active: state.active,
+    lastCategoryId: state.lastCategoryId,
+    sleep: state.sleep ?? null,
+    sleepGoal: state.sleepGoal ?? null,
+  };
 }
 
 /** Keys of every record that differs between two states (including removals). */
@@ -148,6 +153,8 @@ export function applyRemote(state: State, rows: SyncRow[], meta: SyncMeta): { st
   const categories = new Map(state.categories.map((c) => [c.id, c]));
   let active = state.active;
   let lastCategoryId = state.lastCategoryId;
+  let sleep = state.sleep ?? null;
+  let sleepGoal = state.sleepGoal;
   const mtimes = { ...meta.mtimes };
   const dirty = { ...meta.dirty };
   let cursor = meta.cursor;
@@ -197,9 +204,18 @@ export function applyRemote(state: State, rows: SyncRow[], meta: SyncMeta): { st
       const nextActive =
         a && startedAt !== null && typeof a.categoryId === 'string' ? { startedAt, categoryId: a.categoryId } : null;
       const nextLast = typeof d.lastCategoryId === 'string' ? d.lastCategoryId : lastCategoryId;
-      if (JSON.stringify(nextActive) !== JSON.stringify(active) || nextLast !== lastCategoryId) {
+      const s = d.sleep as { startedAt?: unknown } | null | undefined;
+      const sleepStart = num(s?.startedAt);
+      const nextSleep = sleepStart !== null ? { startedAt: sleepStart } : null;
+      const nextGoal = num(d.sleepGoal) ?? sleepGoal;
+      if (
+        JSON.stringify([nextActive, nextLast, nextSleep, nextGoal ?? null]) !==
+        JSON.stringify([active, lastCategoryId, sleep, sleepGoal ?? null])
+      ) {
         active = nextActive;
         lastCategoryId = nextLast;
+        sleep = nextSleep;
+        sleepGoal = nextGoal;
         changed = true;
       }
     }
@@ -213,6 +229,8 @@ export function applyRemote(state: State, rows: SyncRow[], meta: SyncMeta): { st
     sessions: [...sessions.values()],
     active,
     lastCategoryId,
+    sleep,
+    sleepGoal,
   });
   return { state: merged ?? state, meta: nextMeta };
 }

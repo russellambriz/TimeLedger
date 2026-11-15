@@ -6,6 +6,9 @@ export const HOMEWORK_SUBJECTS: readonly Category[] = [
 ];
 export const isHomework = (id: string) => id === 'homework' || HOMEWORK_SUBJECTS.some(c => c.id === id);
 
+export const SLEEP_CATEGORY: Category = { id: 'sleep', name: 'Sleep', color: '#7C90C0' };
+export const DEFAULT_SLEEP_GOAL = 480;
+
 export const DEFAULT_CATEGORIES: readonly Category[] = [
   { id: 'focus', name: 'Focus', color: '#D4B896' },
   { id: 'reading', name: 'Reading', color: '#8CA99B' },

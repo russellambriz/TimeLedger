@@ -196,4 +196,25 @@ describe('two devices syncing', () => {
       expect(device.state.categories.find((c) => c.id === 'reading')?.name).toBe('Novels');
     }
   });
+
+  it('syncs a running sleep timer and the sleep goal', async () => {
+    const server = new FakeServer();
+    const phone = new Device(server);
+    const laptop = new Device(server);
+    await phone.sync();
+    await laptop.sync();
+    phone.act({ type: 'sleep-start', now: phone.tick() });
+    phone.act({ type: 'set-sleep-goal', minutes: 510 });
+    await phone.sync();
+    await laptop.sync();
+    expect(laptop.state.sleep?.startedAt).toBe(phone.state.sleep?.startedAt);
+    expect(laptop.state.sleepGoal).toBe(510);
+
+    laptop.tick(8 * 3_600_000);
+    laptop.act({ type: 'sleep-stop', now: laptop.tick(), id: 'night' });
+    await laptop.sync();
+    await phone.sync();
+    expect(phone.state.sleep ?? null).toBeNull();
+    expect(phone.state.sessions.find((s) => s.id === 'night')?.categoryId).toBe('sleep');
+  });
 });
