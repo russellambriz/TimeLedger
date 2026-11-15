@@ -7,6 +7,7 @@ import '@fontsource/outfit/latin-400.css';
 import '@fontsource/outfit/latin-500.css';
 import { App } from './App';
 import { StoreProvider } from './store';
+import { SyncProvider } from './sync';
 import './styles.css';
 
 const root = document.getElementById('root');
@@ -14,7 +15,9 @@ if (root) {
   createRoot(root).render(
     <StrictMode>
       <StoreProvider>
-        <App />
+        <SyncProvider>
+          <App />
+        </SyncProvider>
       </StoreProvider>
     </StrictMode>,
   );

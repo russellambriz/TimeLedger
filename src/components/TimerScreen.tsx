@@ -5,12 +5,14 @@ import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
 import { HomeworkSheet } from './HomeworkSheet';
 import { StatRow } from './StatRow';
-import { CloudSyncSheet } from './CloudSyncSheet';
+import { CloudSyncSheet, statusLabel } from './CloudSyncSheet';
+import { useSync } from '../sync';
 
 export function TimerScreen() {
   const { state, now, start, stop, setCategory } = useStore();
   const [open, setOpen] = useState(false);
   const [cloudOpen,setCloudOpen]=useState(false);
+  const sync = useSync();
   const [homeworkOpen, setHomeworkOpen] = useState(false);
   const category = selectedCategory(state);
   const running = state.active !== null;
@@ -19,7 +21,7 @@ export function TimerScreen() {
   return (
     <section className="timer">
       <h1 className="brand">Hourwell</h1>
-      <button className="text-btn cloud-shortcut" onClick={()=>setCloudOpen(true)}>Sign in to sync</button>
+      <button className="text-btn cloud-shortcut" onClick={()=>setCloudOpen(true)}>{sync.status !== 'signed-out' && sync.status !== 'loading' && <span className={`sync-dot is-${sync.status}`} aria-hidden="true" />}{statusLabel(sync.status, sync.pending)}</button>
       <div className="focus-intro"><p className="eyebrow">A little more presence.</p><h2>{running ? "You’re making time." : "Make time for what matters."}</h2><p>{running ? "One thing at a time. You’re right where you need to be." : "Your book. Your studies. Your undivided attention."}</p></div>
       <StatRow now={now} />
       <div className="stage">

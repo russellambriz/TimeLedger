@@ -1091,5 +1091,14 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .timeline-selection dl { display: grid; grid-template-columns: auto 1fr; gap: 12px; font-size: 13px; line-height: 1.5; }
 .timeline-selection dt { color: var(--faint); }.timeline-selection dd { margin: 0; overflow-wrap: anywhere; }
 
-.cloud-shortcut {display:block;margin:-8px auto 18px;font-size:11px;letter-spacing:.06em;}
-a.cloud-link {display:block;text-decoration:none;color:var(--ink);}
+.cloud-shortcut {display:flex;align-items:center;gap:6px;width:fit-content;margin:-8px auto 18px;font-size:11px;letter-spacing:.06em;}
+
+.sync-state { display: flex; align-items: center; gap: 8px; margin: 4px 0 8px; font-size: 15px; }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); flex: none; }
+.sync-dot.is-synced { background: #8CA99B; }
+.sync-dot.is-syncing { background: var(--gold); animation: sync-pulse 1.2s ease-in-out infinite; }
+.sync-dot.is-offline { background: var(--faint); }
+.sync-dot.is-error { background: var(--danger); }
+@keyframes sync-pulse { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .sync-dot.is-syncing { animation: none; } }
+.btn-gold:disabled { opacity: 0.55; }
