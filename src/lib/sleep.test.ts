@@ -67,4 +67,19 @@ describe('sleep stats', () => {
     expect(missedNightDefaults(at(15, 9))).toEqual({ start: at(14, 22, 30), end: at(15, 6, 30) });
     expect(missedNightDefaults(at(15, 3))).toEqual({ start: at(13, 22, 30), end: at(14, 6, 30) });
   });
+
+  it('adds a missed night before the sleep timer has ever been used', () => {
+    const fresh = defaultState();
+    expect(fresh.categories.some((c) => c.id === 'sleep')).toBe(false);
+    const next = reducer(fresh, { type: 'add-session', id: 'm', categoryId: 'sleep', start: at(16, 5, 41), end: at(16, 9, 11) });
+    expect(next.sessions).toEqual([{ id: 'm', categoryId: 'sleep', start: at(16, 5, 41), end: at(16, 9, 11) }]);
+    expect(next.categories.some((c) => c.id === 'sleep')).toBe(true);
+  });
+
+  it('still refuses an overlapping night', () => {
+    let st = reducer(defaultState(), { type: 'add-session', id: 'f', categoryId: 'reading', start: at(16, 8), end: at(16, 9) });
+    const before = st;
+    st = reducer(st, { type: 'add-session', id: 'm', categoryId: 'sleep', start: at(16, 5, 41), end: at(16, 9, 11) });
+    expect(st).toBe(before);
+  });
 });

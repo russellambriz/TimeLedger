@@ -31,7 +31,11 @@ function activeCategories(state: State) {
   return state.categories.filter((category) => !category.archived);
 }
 
-export function reducer(state: State, action: Action): State {
+export function reducer(original: State, action: Action): State {
+  // Logging or editing a night must work even before the sleep timer has ever been used.
+  const touchesSleep =
+    (action.type === 'add-session' || action.type === 'update-session') && action.categoryId === SLEEP_CATEGORY.id;
+  const state = touchesSleep ? withSleepCategory(original) : original;
   switch (action.type) {
     case 'start': {
       if (state.active) return state;
@@ -126,11 +130,11 @@ export function reducer(state: State, action: Action): State {
       };
     }
     case 'add-session': {
-      if (!Number.isFinite(action.start) || !Number.isFinite(action.end) || !(action.end > action.start)) return state;
-      if (state.sessions.some(s => action.start < s.end && action.end > s.start)) return state;
-      if (state.active && action.end > state.active.startedAt) return state;
-      if (!state.categories.some((item) => item.id === action.categoryId && !item.archived)) return state;
-      if (state.sessions.some((session) => session.id === action.id)) return state;
+      if (!Number.isFinite(action.start) || !Number.isFinite(action.end) || !(action.end > action.start)) return original;
+      if (state.sessions.some(s => action.start < s.end && action.end > s.start)) return original;
+      if (state.active && action.end > state.active.startedAt) return original;
+      if (!state.categories.some((item) => item.id === action.categoryId && (!item.archived || touchesSleep))) return original;
+      if (state.sessions.some((session) => session.id === action.id)) return original;
       return {
         ...state,
         sessions: [
@@ -141,16 +145,16 @@ export function reducer(state: State, action: Action): State {
     }
     case 'update-session': {
       const index = state.sessions.findIndex((session) => session.id === action.id);
-      if (index < 0) return state;
+      if (index < 0) return original;
       const current = state.sessions[index];
       const start = action.start ?? current.start;
       const end = action.end ?? current.end;
       const categoryId = action.categoryId ?? current.categoryId;
-      if (!Number.isFinite(start) || !Number.isFinite(end) || !(end > start)) return state;
-      if (state.sessions.some(s => s.id !== action.id && start < s.end && end > s.start)) return state;
-      if (state.active && end > state.active.startedAt) return state;
-      if (!state.categories.some((item) => item.id === categoryId)) return state;
-      if (start === current.start && end === current.end && categoryId === current.categoryId) return state;
+      if (!Number.isFinite(start) || !Number.isFinite(end) || !(end > start)) return original;
+      if (state.sessions.some(s => s.id !== action.id && start < s.end && end > s.start)) return original;
+      if (state.active && end > state.active.startedAt) return original;
+      if (!state.categories.some((item) => item.id === categoryId)) return original;
+      if (start === current.start && end === current.end && categoryId === current.categoryId) return original;
       const sessions = state.sessions.slice();
       sessions[index] = { ...current, start, end, categoryId };
       return { ...state, sessions };
