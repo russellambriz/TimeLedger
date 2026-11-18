@@ -1132,3 +1132,10 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .ok-note { color: #8CA99B; }
 
 .forgot-link { margin-top: -10px; font-size: 11px; }
+
+.session-summary { display: flex; align-items: flex-start; gap: 12px; margin: 4px 0 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #ffffff06; }
+.session-summary .dot { margin-top: 7px; flex: none; }
+.session-summary p { margin: 0; }
+.session-summary-title { font-size: 17px; }
+.session-summary-title span { color: var(--muted); }
+.session-summary-time { margin-top: 4px !important; font-family: var(--font-serif); font-size: 24px; color: var(--gold-soft); line-height: 1.2; }
