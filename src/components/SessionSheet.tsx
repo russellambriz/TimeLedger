@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { fromDatetimeLocal, toDatetimeLocal } from '../lib/format';
+import { lookupCategory } from '../lib/defaults';
+import { formatRange, formatTime, fromDatetimeLocal, toDatetimeLocal } from '../lib/format';
 import { useStore } from '../store';
 import type { Session } from '../types';
 import { Sheet } from './Sheet';
@@ -58,7 +59,14 @@ export function SessionSheet({
       ? updateSession(session.id, { categoryId, start, end })
       : addSession({ categoryId, start, end });
     if (!ok) {
-      setError('Could not save. Check for overlapping sessions or a device storage warning.');
+      const clash = state.sessions.find((s) => s.id !== session?.id && start < s.end && end > s.start);
+      if (clash) {
+        setError(`These times overlap your ${lookupCategory(state, clash.categoryId).name} session (${formatRange(clash.start, clash.end)}). Change the times, or edit that session in History.`);
+      } else if (state.active && end > state.active.startedAt) {
+        setError(`A focus timer has been running since ${formatTime(state.active.startedAt)}. Stop it first, or end this before then.`);
+      } else {
+        setError('Could not save on this device. Try again.');
+      }
       return;
     }
     onClose();
