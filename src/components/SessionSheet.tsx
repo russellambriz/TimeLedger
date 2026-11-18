@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { lookupCategory } from '../lib/defaults';
+import { lookupCategory, SLEEP_CATEGORY } from '../lib/defaults';
 import { formatRange, formatTime, fromDatetimeLocal, toDatetimeLocal } from '../lib/format';
 import { useStore } from '../store';
 import type { Session } from '../types';
@@ -28,7 +28,11 @@ export function SessionSheet({
   defaultEnd?: number;
 }) {
   const { state, now, addSession, updateSession, deleteSession } = useStore();
-  const choices = state.categories.filter((category) => !category.archived || category.id === session?.categoryId);
+  // Sleep has its own tab, so it's only offered here when editing a sleep entry.
+  const choices = state.categories.filter(
+    (category) =>
+      (!category.archived && category.id !== SLEEP_CATEGORY.id) || category.id === session?.categoryId,
+  );
   const initialEnd = floorMinute(defaultEnd ?? now);
   const [categoryId, setCategoryId] = useState(lockCategoryId ?? session?.categoryId ?? state.lastCategoryId);
   const [startValue, setStartValue] = useState(toDatetimeLocal(session?.start ?? defaultStart ?? initialEnd - 30 * 60000));

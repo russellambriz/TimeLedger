@@ -3,6 +3,7 @@ import { selectedCategory, LEGACY_CATEGORIES, HOMEWORK_SUBJECTS, isHomework } fr
 import { formatClock } from '../lib/format';
 import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
+import { SessionSheet } from './SessionSheet';
 import { HomeworkSheet } from './HomeworkSheet';
 import { StatRow } from './StatRow';
 import { CloudSyncSheet, statusLabel } from './CloudSyncSheet';
@@ -14,6 +15,7 @@ export function TimerScreen() {
   const [cloudOpen,setCloudOpen]=useState(false);
   const sync = useSync();
   const [homeworkOpen, setHomeworkOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const category = selectedCategory(state);
   const running = state.active !== null;
   const elapsed = running && state.active ? Math.max(0, now - state.active.startedAt) : 0;
@@ -67,8 +69,19 @@ export function TimerScreen() {
           {state.categories.filter(c => !c.archived && !LEGACY_CATEGORIES.has(c.id) && !HOMEWORK_SUBJECTS.some(subject => subject.id === c.id)).slice(0, 4).map(c => <button key={c.id} aria-pressed={category.id === c.id || (c.id === 'homework' && isHomework(category.id))} onClick={() => c.id === 'homework' ? setHomeworkOpen(true) : setCategory(c.id)}>{c.name}</button>)}
         </div>
         <p className="timer-caption">{running ? 'Tap once to finish. Your time is saved automatically.' : 'One tap to start. One tap to stop and save.'}</p>
+        <button type="button" className="text-btn forgot-link" onClick={() => setAddOpen(true)}>
+          Forgot to track? Add a session
+        </button>
       </div>
       {cloudOpen && <CloudSyncSheet onClose={()=>setCloudOpen(false)} />}
+      {addOpen && (
+        <SessionSheet
+          session={null}
+          title="Add a session"
+          note="Log focus time you forgot to track. Pick the activity, then when you started and finished."
+          onClose={() => setAddOpen(false)}
+        />
+      )}
       {homeworkOpen && <HomeworkSheet onClose={() => setHomeworkOpen(false)} />}
       {open && <CategorySheet onClose={() => setOpen(false)} />}
     </section>

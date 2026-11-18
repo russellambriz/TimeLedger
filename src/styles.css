@@ -1130,3 +1130,5 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .password-form h3 { margin: 0 0 4px; font-family: var(--font-serif); font-weight: 500; font-size: 22px; }
 .password-form .quiet { margin: 0 0 12px; }
 .ok-note { color: #8CA99B; }
+
+.forgot-link { margin-top: -10px; font-size: 11px; }
