@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { lookupCategory, SLEEP_CATEGORY } from '../lib/defaults';
-import { formatRange, formatTime, fromDatetimeLocal, toDatetimeLocal } from '../lib/format';
+import { formatDuration, formatRange, formatTime, fromDatetimeLocal, toDatetimeLocal } from '../lib/format';
 import { useStore } from '../store';
 import type { Session } from '../types';
 import { Sheet } from './Sheet';
@@ -78,6 +78,20 @@ export function SessionSheet({
 
   return (
     <Sheet title={title ?? (session ? 'Edit session' : 'Add session')} onClose={onClose}>
+      {session && (
+        <div className="session-summary" role="status">
+          <span className="dot" style={{ background: lookupCategory(state, session.categoryId).color }} />
+          <div>
+            <p className="session-summary-title">
+              {lookupCategory(state, session.categoryId).name}
+              <span> · {new Date(session.start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            </p>
+            <p className="session-summary-time">
+              {formatRange(session.start, session.end)} · {formatDuration(session.end - session.start)}
+            </p>
+          </div>
+        </div>
+      )}
       {note && <p className="sheet-copy">{note}</p>}
       {!lockCategoryId && <div className="chips" role="listbox" aria-label="Category">
         {choices.map((category) => (
