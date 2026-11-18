@@ -5,6 +5,9 @@ import { useStore } from '../store';
 import type { Session } from '../types';
 import { Sheet } from './Sheet';
 
+// A session longer than this almost always means a wrong date.
+const LONG_SESSION = 16 * 3_600_000;
+
 function floorMinute(ms: number): number {
   return Math.floor(ms / 60000) * 60000;
 }
@@ -40,6 +43,11 @@ export function SessionSheet({
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
 
+  const previewStart = fromDatetimeLocal(startValue);
+  const previewEnd = fromDatetimeLocal(endValue);
+  const previewLength =
+    Number.isFinite(previewStart) && Number.isFinite(previewEnd) && previewEnd > previewStart ? previewEnd - previewStart : null;
+
   const save = () => {
     const start = session && startValue === toDatetimeLocal(session.start) ? session.start : fromDatetimeLocal(startValue);
     const end = session && endValue === toDatetimeLocal(session.end) ? session.end : fromDatetimeLocal(endValue);
@@ -65,7 +73,8 @@ export function SessionSheet({
     if (!ok) {
       const clash = state.sessions.find((s) => s.id !== session?.id && start < s.end && end > s.start);
       if (clash) {
-        setError(`These times overlap your ${lookupCategory(state, clash.categoryId).name} session (${formatRange(clash.start, clash.end)}). Change the times, or edit that session in History.`);
+        const clashDay = new Date(clash.start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        setError(`These times overlap your ${lookupCategory(state, clash.categoryId).name} session on ${clashDay} (${formatRange(clash.start, clash.end)}). Check the dates and times, or edit that session in History.`);
       } else if (state.active && end > state.active.startedAt) {
         setError(`A focus timer has been running since ${formatTime(state.active.startedAt)}. Stop it first, or end this before then.`);
       } else {
@@ -114,6 +123,12 @@ export function SessionSheet({
         <span>{lockCategoryId ? 'Woke up' : 'End'}</span>
         <input type="datetime-local" step={1} value={endValue} onChange={(event) => setEndValue(event.target.value)} />
       </label>
+      {previewLength !== null && (
+        <p className={previewLength > LONG_SESSION ? 'form-error' : 'quiet length-preview'}>
+          Length: {formatDuration(previewLength)}
+          {previewLength > LONG_SESSION && ' — that’s unusually long. Check that the start and end dates are right.'}
+        </p>
+      )}
       {error && <p className="form-error">{error}</p>}
       <button type="button" className="btn-gold" onClick={save}>
         Save
