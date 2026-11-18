@@ -1139,3 +1139,5 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .session-summary-title { font-size: 17px; }
 .session-summary-title span { color: var(--muted); }
 .session-summary-time { margin-top: 4px !important; font-family: var(--font-serif); font-size: 24px; color: var(--gold-soft); line-height: 1.2; }
+
+.length-preview { margin: -4px 0 10px; }
