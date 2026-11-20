@@ -7,6 +7,7 @@ import { startOfDay } from '../lib/time';
 import { useStore } from '../store';
 import type { Session } from '../types';
 import { SessionSheet } from './SessionSheet';
+import { FixTimerSheet } from './FixTimerSheet';
 
 const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const LONG_NIGHT = 16 * 3_600_000;
@@ -16,7 +17,7 @@ type Editing = { session: Session | null; title: string; note?: string; start?: 
 export function SleepScreen() {
   const { state, now, startSleep, stopSleep, discardSleep, setSleepGoal } = useStore();
   const [editing, setEditing] = useState<Editing | null>(null);
-  const [discardArmed, setDiscardArmed] = useState(false);
+  const [fixOpen, setFixOpen] = useState(false);
   const sleeping = !!state.sleep;
   const elapsed = state.sleep ? Math.max(0, now - state.sleep.startedAt) : 0;
   const goal = sleepGoalMs(state);
@@ -106,21 +107,9 @@ export function SleepScreen() {
           )}
         </button>
         {sleeping ? (
-          discardArmed ? (
-            <div className="confirm inline">
-              <p>Discard this sleep timer? Nothing will be saved.</p>
-              <button type="button" className="text-btn danger" onClick={() => { discardSleep(); setDiscardArmed(false); }}>
-                Discard
-              </button>
-              <button type="button" className="text-btn" onClick={() => setDiscardArmed(false)}>
-                Keep
-              </button>
-            </div>
-          ) : (
-            <button type="button" className="text-btn" onClick={() => setDiscardArmed(true)}>
-              Started by mistake?
-            </button>
-          )
+          <button type="button" className="text-btn forgot-link" onClick={() => setFixOpen(true)}>
+            Forgot to stop, or started by accident?
+          </button>
         ) : (
           <p className="timer-caption">
             {state.active ? 'Starting sleep will stop and save your focus session.' : 'Forgot to tap? Add the night below.'}
@@ -187,6 +176,17 @@ export function SleepScreen() {
         ))}
       </div>
 
+      {fixOpen && state.sleep && (
+        <FixTimerSheet
+          name="Sleep"
+          startedAt={state.sleep.startedAt}
+          endLabel="Woke up"
+          now={now}
+          onStopAt={(endAt) => stopSleep(endAt)}
+          onDiscard={discardSleep}
+          onClose={() => setFixOpen(false)}
+        />
+      )}
       {editing && (
         <SessionSheet
           session={editing.session}

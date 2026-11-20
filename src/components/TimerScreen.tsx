@@ -4,18 +4,20 @@ import { formatClock } from '../lib/format';
 import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
 import { SessionSheet } from './SessionSheet';
+import { FixTimerSheet } from './FixTimerSheet';
 import { HomeworkSheet } from './HomeworkSheet';
 import { StatRow } from './StatRow';
 import { CloudSyncSheet, statusLabel } from './CloudSyncSheet';
 import { useSync } from '../sync';
 
 export function TimerScreen() {
-  const { state, now, start, stop, setCategory } = useStore();
+  const { state, now, start, stop, discard, setCategory } = useStore();
   const [open, setOpen] = useState(false);
   const [cloudOpen,setCloudOpen]=useState(false);
   const sync = useSync();
   const [homeworkOpen, setHomeworkOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [fixOpen, setFixOpen] = useState(false);
   const category = selectedCategory(state);
   const running = state.active !== null;
   const elapsed = running && state.active ? Math.max(0, now - state.active.startedAt) : 0;
@@ -69,11 +71,28 @@ export function TimerScreen() {
           {state.categories.filter(c => !c.archived && !LEGACY_CATEGORIES.has(c.id) && !HOMEWORK_SUBJECTS.some(subject => subject.id === c.id)).slice(0, 4).map(c => <button key={c.id} aria-pressed={category.id === c.id || (c.id === 'homework' && isHomework(category.id))} onClick={() => c.id === 'homework' ? setHomeworkOpen(true) : setCategory(c.id)}>{c.name}</button>)}
         </div>
         <p className="timer-caption">{running ? 'Tap once to finish. Your time is saved automatically.' : 'One tap to start. One tap to stop and save.'}</p>
-        <button type="button" className="text-btn forgot-link" onClick={() => setAddOpen(true)}>
-          Forgot to track? Add a session
-        </button>
+        {running ? (
+          <button type="button" className="text-btn forgot-link" onClick={() => setFixOpen(true)}>
+            Forgot to stop, or started by accident?
+          </button>
+        ) : (
+          <button type="button" className="text-btn forgot-link" onClick={() => setAddOpen(true)}>
+            Forgot to track? Add a session
+          </button>
+        )}
       </div>
       {cloudOpen && <CloudSyncSheet onClose={()=>setCloudOpen(false)} />}
+      {fixOpen && state.active && (
+        <FixTimerSheet
+          name={category.name}
+          startedAt={state.active.startedAt}
+          endLabel="Finished"
+          now={now}
+          onStopAt={(endAt) => stop(endAt)}
+          onDiscard={discard}
+          onClose={() => setFixOpen(false)}
+        />
+      )}
       {addOpen && (
         <SessionSheet
           session={null}
