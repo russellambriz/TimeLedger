@@ -13,7 +13,8 @@ type StoreApi = {
   saveError: boolean;
   retrySave: () => void;
   start: () => void;
-  stop: () => void;
+  /** Stop the focus timer. `endAt` saves an earlier finish time (for a forgotten stop). */
+  stop: (endAt?: number) => void;
   discard: () => void;
   setCategory: (id: string) => void;
   addCategory: (name: string, color: string) => string | null;
@@ -27,7 +28,7 @@ type StoreApi = {
   /** Start the sleep timer. Stops and saves a running focus session first. */
   startSleep: () => void;
   /** Stop the sleep timer and save the night. Returns the saved session. */
-  stopSleep: () => Session | null;
+  stopSleep: (endAt?: number) => Session | null;
   discardSleep: () => void;
   setSleepGoal: (minutes: number) => void;
   /** Current state, readable outside React renders (used by sync). */
@@ -130,8 +131,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setNow(startedAt);
       dispatch({ type: 'start', now: startedAt });
     },
-    stop: () => {
-      const stoppedAt = Date.now();
+    stop: (endAt) => {
+      const stoppedAt = Math.min(endAt ?? Date.now(), Date.now());
       const id = uid();
       const next = reducer(ref.current, { type: 'stop', now: stoppedAt, id });
       if (next === ref.current) return;
@@ -180,9 +181,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setNow(startedAt);
       if (dispatch({ type: 'sleep-start', now: startedAt })) notify('Sleep well.');
     },
-    stopSleep: () => {
+    stopSleep: (endAt) => {
       const id = uid();
-      const next = reducer(ref.current, { type: 'sleep-stop', now: Date.now(), id });
+      const next = reducer(ref.current, { type: 'sleep-stop', now: Math.min(endAt ?? Date.now(), Date.now()), id });
       if (next === ref.current || !commit(next)) return null;
       const session = next.sessions.find((item) => item.id === id && item.categoryId === SLEEP_CATEGORY.id) ?? null;
       notify(session ? `Good morning · slept ${formatDuration(session.end - session.start)}` : 'Good morning.');
