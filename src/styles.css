@@ -1144,3 +1144,36 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 
 .fix-heading { margin: 22px 0 4px; font-family: var(--font-serif); font-weight: 500; font-size: 22px; }
 .sheet .text-btn.danger { display: block; }
+
+/* Caffeine */
+.caffeine-body { width: min(620px, 100%); margin: 0 auto; padding: 18px 20px 40px; }
+.limit-meter { height: 10px; border-radius: 999px; background: #ffffff0d; overflow: hidden; }
+.limit-meter span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #c6a36a, #edd9b8); transition: width .3s ease; }
+.limit-meter span.is-over { background: var(--danger); }
+.meter-note { margin: 8px 0 0; font-size: 13px; }
+.section-title { margin: 24px 0 10px; font-family: var(--font-serif); font-weight: 500; font-size: 24px; }
+.drink-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 4px; }
+.drink-chip { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 64px; padding: 6px 4px; border: 1px solid var(--line); border-radius: 14px; color: var(--ink); font-size: 13px; text-align: center; transition: background .15s, border-color .15s; }
+.drink-chip small { color: var(--faint); font-size: 11px; }
+.drink-chip:active { background: #d4b89619; border-color: var(--gold-deep); }
+.bedtime-card { margin: 18px 0 6px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #ffffff06; }
+.bedtime-card.is-high { border-color: #d27a6866; }
+.bedtime-card p { margin: 0; }
+.bedtime-label { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.bedtime-value { margin: 6px 0 8px !important; font-family: var(--font-serif); font-size: 32px; color: var(--gold-soft); }
+.bedtime-card.is-high .bedtime-value { color: var(--danger); }
+.bedtime-card .quiet { font-size: 12px; line-height: 1.5; }
+.caffeine-bar-fill { width: 100%; border-radius: 8px; background: #b98a5e; transition: height .3s ease; }
+.caffeine-bar-fill.is-over { background: var(--danger); }
+.drink-hint { margin: -6px 0 12px; font-size: 12px; }
+@media (max-width: 360px) { .drink-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tab span { letter-spacing: 0.1em; }
+
+.caffeine-alert { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--gold-deep); background: #d4b89612; font-size: 14px; line-height: 1.45; }
+.caffeine-alert strong { color: var(--gold-soft); font-weight: 500; }
+.caffeine-alert span { color: var(--muted); }
+.caffeine-alert.is-over { border-color: var(--danger); background: #d27a681f; }
+.caffeine-alert.is-over strong { color: var(--danger); }
+.drink-chip.would-exceed { border-color: #d27a6866; }
+.drink-chip.would-exceed small { color: var(--danger); }
+.drink-chip em { font-style: normal; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--danger); }

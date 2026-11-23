@@ -1,4 +1,4 @@
-import { applyRemote, prepareForUser, rowFor, type SyncMeta, type SyncRow } from './syncCore';
+import { applyRemote, keyOf, prepareForUser, rowFor, type SyncMeta, type SyncRow } from './syncCore';
 import type { State } from '../types';
 
 export interface Remote {
@@ -24,6 +24,7 @@ const OVERLAP_MS = 60_000;
 
 /** One full round: upload local changes, then download and merge everything new. */
 export async function runSync(ctx: SyncContext): Promise<void> {
+  let drinkError: unknown = null;
   let meta = prepareForUser(ctx.loadMeta(), ctx.getState(), ctx.userId);
   ctx.saveMeta(meta);
 
@@ -35,11 +36,21 @@ export async function runSync(ctx: SyncContext): Promise<void> {
       sent[key] = meta.mtimes[key] ?? 1;
       return rowFor(state, key, sent[key]);
     });
-    for (let i = 0; i < rows.length; i += PUSH_BATCH) await ctx.remote.push(rows.slice(i, i + PUSH_BATCH));
-    // Only clear records that did not change again while uploading.
+    // Drinks upload separately, so a cloud that isn't set up for them yet never blocks the rest.
+    const core = rows.filter((row) => row.kind !== 'drink');
+    const drinks = rows.filter((row) => row.kind === 'drink');
+    for (let i = 0; i < core.length; i += PUSH_BATCH) await ctx.remote.push(core.slice(i, i + PUSH_BATCH));
+    const uploaded = new Set(core.map((row) => keyOf(row.kind, row.id)));
+    try {
+      for (let i = 0; i < drinks.length; i += PUSH_BATCH) await ctx.remote.push(drinks.slice(i, i + PUSH_BATCH));
+      for (const row of drinks) uploaded.add(keyOf(row.kind, row.id));
+    } catch (err) {
+      drinkError = err;
+    }
+    // Only clear records that uploaded and did not change again meanwhile.
     meta = ctx.loadMeta();
     const dirty = { ...meta.dirty };
-    for (const key of keys) if (meta.mtimes[key] === sent[key]) delete dirty[key];
+    for (const key of uploaded) if (meta.mtimes[key] === sent[key]) delete dirty[key];
     meta = { ...meta, dirty };
     ctx.saveMeta(meta);
   }
@@ -50,4 +61,12 @@ export async function runSync(ctx: SyncContext): Promise<void> {
   const merged = applyRemote(ctx.getState(), rows, ctx.loadMeta());
   if (!ctx.applyState(merged.state)) throw new Error('Could not save synced data on this device.');
   ctx.saveMeta(merged.meta);
+  if (drinkError) {
+    const text = drinkError instanceof Error ? drinkError.message : String(drinkError);
+    throw new Error(
+      /check constraint|records_kind_check/i.test(text)
+        ? 'Caffeine isn’t syncing yet: the cloud needs a one-time update (see the README). Everything else synced.'
+        : text,
+    );
+  }
 }

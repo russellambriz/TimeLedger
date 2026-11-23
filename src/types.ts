@@ -17,6 +17,15 @@ export type ActiveTimer = {
   categoryId: string;
 };
 
+export type Drink = {
+  id: string;
+  name: string;
+  /** Caffeine in milligrams. */
+  mg: number;
+  /** When it was drunk (ms). */
+  at: number;
+};
+
 export type SleepTimer = {
   startedAt: number;
 };
@@ -31,4 +40,8 @@ export type State = {
   sleep?: SleepTimer | null;
   /** Nightly sleep goal in minutes. */
   sleepGoal?: number;
+  /** Logged caffeinated drinks. */
+  drinks?: Drink[];
+  /** Daily caffeine limit in mg. */
+  caffeineLimit?: number;
 };

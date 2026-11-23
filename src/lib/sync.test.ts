@@ -10,10 +10,15 @@ class FakeServer {
   rows = new Map<string, SyncRow & { updated_at: string }>();
   private clock = Date.UTC(2026, 10, 15);
   offline = false;
+  /** Mimics a cloud whose table doesn't allow drink records yet. */
+  rejectDrinks = false;
   remote(): Remote {
     return {
       push: async (rows) => {
         if (this.offline) throw new Error('Failed to fetch');
+        if (this.rejectDrinks && rows.some((row) => row.kind === 'drink')) {
+          throw new Error('new row for relation "records" violates check constraint "records_kind_check"');
+        }
         for (const row of rows) {
           const key = `${row.kind}:${row.id}`;
           const old = this.rows.get(key);
@@ -216,5 +221,26 @@ describe('two devices syncing', () => {
     await phone.sync();
     expect(phone.state.sleep ?? null).toBeNull();
     expect(phone.state.sessions.find((s) => s.id === 'night')?.categoryId).toBe('sleep');
+  });
+
+  it('syncs drinks, and keeps syncing everything else if the cloud rejects drinks', async () => {
+    const server = new FakeServer();
+    const phone = new Device(server);
+    const laptop = new Device(server);
+    await phone.sync();
+    await laptop.sync();
+
+    server.rejectDrinks = true;
+    phone.act({ type: 'add-drink', id: 'coffee', name: 'Coffee', mg: 95, at: phone.tick() });
+    phone.act({ type: 'add-session', id: 'study', categoryId: 'reading', start: 1000, end: 2000 });
+    await expect(phone.sync()).rejects.toThrow(/Caffeine isn’t syncing yet/);
+    expect(server.rows.has('session:study')).toBe(true);
+    expect(phone.meta.dirty['drink:coffee']).toBe(true);
+
+    server.rejectDrinks = false;
+    await phone.sync();
+    await laptop.sync();
+    expect(laptop.state.drinks?.map((d) => d.id)).toEqual(['coffee']);
+    expect(laptop.state.sessions.map((s) => s.id)).toEqual(['study']);
   });
 });

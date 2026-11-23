@@ -1,10 +1,10 @@
-import { parseState } from './storage';
-import type { Category, Session, State } from '../types';
+import { parseDrink, parseState } from './storage';
+import type { Category, Drink, Session, State } from '../types';
 
 // Every synced thing is one record: a session, a category, or the "settings"
 // record (running timer + last used activity). Records are never hard-deleted
 // in the cloud; a deletion is a tombstone so it reaches every device.
-export type RecordKind = 'session' | 'category' | 'settings';
+export type RecordKind = 'session' | 'category' | 'settings' | 'drink';
 
 export type SyncRow = {
   kind: RecordKind;
@@ -54,7 +54,12 @@ function settingsOf(state: State) {
     lastCategoryId: state.lastCategoryId,
     sleep: state.sleep ?? null,
     sleepGoal: state.sleepGoal ?? null,
+    caffeineLimit: state.caffeineLimit ?? null,
   };
+}
+
+function sameDrink(a: Drink, b: Drink) {
+  return a.name === b.name && a.mg === b.mg && a.at === b.at;
 }
 
 /** Keys of every record that differs between two states (including removals). */
@@ -76,6 +81,14 @@ export function diffState(prev: State, next: State): string[] {
   }
   for (const id of prevCats.keys()) if (!nextCats.has(id)) keys.push(keyOf('category', id));
 
+  const prevDrinks = new Map((prev.drinks ?? []).map((d) => [d.id, d]));
+  const nextDrinks = new Map((next.drinks ?? []).map((d) => [d.id, d]));
+  for (const [id, d] of nextDrinks) {
+    const old = prevDrinks.get(id);
+    if (!old || !sameDrink(old, d)) keys.push(keyOf('drink', id));
+  }
+  for (const id of prevDrinks.keys()) if (!nextDrinks.has(id)) keys.push(keyOf('drink', id));
+
   if (JSON.stringify(settingsOf(prev)) !== JSON.stringify(settingsOf(next))) keys.push(SETTINGS_KEY);
   return keys;
 }
@@ -85,6 +98,7 @@ export function allKeys(state: State): string[] {
   return [
     ...state.categories.map((c) => keyOf('category', c.id)),
     ...state.sessions.map((s) => keyOf('session', s.id)),
+    ...(state.drinks ?? []).map((d) => keyOf('drink', d.id)),
     SETTINGS_KEY,
   ];
 }
@@ -128,6 +142,12 @@ export function rowFor(state: State, key: string, modifiedAt: number): SyncRow {
       ? { ...base, deleted: false, data: { categoryId: s.categoryId, start: s.start, end: s.end } }
       : { ...base, deleted: true, data: null };
   }
+  if (kind === 'drink') {
+    const d = (state.drinks ?? []).find((item) => item.id === id);
+    return d
+      ? { ...base, deleted: false, data: { name: d.name, mg: d.mg, at: d.at } }
+      : { ...base, deleted: true, data: null };
+  }
   if (kind === 'category') {
     const c = state.categories.find((item) => item.id === id);
     if (!c) return { ...base, deleted: true, data: null };
@@ -155,6 +175,8 @@ export function applyRemote(state: State, rows: SyncRow[], meta: SyncMeta): { st
   let lastCategoryId = state.lastCategoryId;
   let sleep = state.sleep ?? null;
   let sleepGoal = state.sleepGoal;
+  let caffeineLimit = state.caffeineLimit;
+  const drinks = new Map((state.drinks ?? []).map((d) => [d.id, d]));
   const mtimes = { ...meta.mtimes };
   const dirty = { ...meta.dirty };
   let cursor = meta.cursor;
@@ -170,7 +192,19 @@ export function applyRemote(state: State, rows: SyncRow[], meta: SyncMeta): { st
     delete dirty[key];
     const d = row.data ?? {};
 
-    if (row.kind === 'session') {
+    if (row.kind === 'drink') {
+      if (row.deleted) {
+        changed = drinks.delete(row.id) || changed;
+        continue;
+      }
+      const drink = parseDrink({ id: row.id, ...d });
+      if (!drink) continue;
+      const old = drinks.get(row.id);
+      if (!old || !sameDrink(old, drink)) {
+        drinks.set(row.id, drink);
+        changed = true;
+      }
+    } else if (row.kind === 'session') {
       if (row.deleted) {
         changed = sessions.delete(row.id) || changed;
         continue;
@@ -208,10 +242,12 @@ export function applyRemote(state: State, rows: SyncRow[], meta: SyncMeta): { st
       const sleepStart = num(s?.startedAt);
       const nextSleep = sleepStart !== null ? { startedAt: sleepStart } : null;
       const nextGoal = num(d.sleepGoal) ?? sleepGoal;
+      const nextLimit = num(d.caffeineLimit) ?? caffeineLimit;
       if (
-        JSON.stringify([nextActive, nextLast, nextSleep, nextGoal ?? null]) !==
-        JSON.stringify([active, lastCategoryId, sleep, sleepGoal ?? null])
+        JSON.stringify([nextActive, nextLast, nextSleep, nextGoal ?? null, nextLimit ?? null]) !==
+        JSON.stringify([active, lastCategoryId, sleep, sleepGoal ?? null, caffeineLimit ?? null])
       ) {
+        caffeineLimit = nextLimit;
         active = nextActive;
         lastCategoryId = nextLast;
         sleep = nextSleep;
@@ -231,6 +267,8 @@ export function applyRemote(state: State, rows: SyncRow[], meta: SyncMeta): { st
     lastCategoryId,
     sleep,
     sleepGoal,
+    drinks: [...drinks.values()],
+    caffeineLimit,
   });
   return { state: merged ?? state, meta: nextMeta };
 }
