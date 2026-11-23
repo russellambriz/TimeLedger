@@ -4,6 +4,7 @@ import { InsightsScreen } from './components/InsightsScreen';
 import { TabBar, type Tab } from './components/TabBar';
 import { TimerScreen } from './components/TimerScreen';
 import { SleepScreen } from './components/SleepScreen';
+import { CaffeineScreen } from './components/CaffeineScreen';
 import { useStore } from './store';
 
 export function App() {
@@ -16,6 +17,7 @@ export function App() {
       {saveError && <div className="save-warning" role="alert">Not saved yet. Keep this app open. <button onClick={retrySave}>Retry save</button><span>You can also export a backup from History → Data.</span></div>}
       {tab === 'timer' && <TimerScreen />}
       {tab === 'sleep' && <SleepScreen />}
+      {tab === 'caffeine' && <CaffeineScreen />}
       {tab === 'insights' && <InsightsScreen />}
       {tab === 'history' && <HistoryScreen onShowTimer={() => setTab('timer')} />}
       <TabBar tab={tab} onTab={setTab} />

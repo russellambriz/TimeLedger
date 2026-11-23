@@ -29,6 +29,8 @@ export function toJSON(state: State): string {
       lastCategoryId: state.lastCategoryId,
       sleep: state.sleep ?? null,
       sleepGoal: state.sleepGoal,
+      drinks: state.drinks ?? [],
+      caffeineLimit: state.caffeineLimit,
     },
     null,
     2,

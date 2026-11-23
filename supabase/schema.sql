@@ -4,7 +4,7 @@
 
 create table if not exists public.records (
   user_id     uuid   not null default auth.uid() references auth.users (id) on delete cascade,
-  kind        text   not null check (kind in ('session', 'category', 'settings')),
+  kind        text   not null check (kind in ('session', 'category', 'settings', 'drink')),
   id          text   not null check (char_length(id) between 1 and 100),
   data        jsonb  check (data is null or pg_column_size(data) < 4000),
   deleted     boolean not null default false,
@@ -62,3 +62,8 @@ begin
 exception when duplicate_object then null;
 end;
 $$;
+
+-- Upgrade for projects created before caffeine tracking (safe to re-run).
+alter table public.records drop constraint if exists records_kind_check;
+alter table public.records add constraint records_kind_check
+  check (kind in ('session', 'category', 'settings', 'drink'));

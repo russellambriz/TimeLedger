@@ -1,5 +1,5 @@
 import { defaultState, HOMEWORK_SUBJECTS, SLEEP_CATEGORY } from './defaults';
-import { MAX_SLEEP_GOAL, MIN_SLEEP_GOAL } from './storage';
+import { MAX_CAFFEINE_LIMIT, MAX_SLEEP_GOAL, MIN_CAFFEINE_LIMIT, MIN_SLEEP_GOAL, parseDrink } from './storage';
 import type { State } from '../types';
 
 export type Action =
@@ -18,6 +18,10 @@ export type Action =
   | { type: 'sleep-stop'; now: number; id: string }
   | { type: 'sleep-discard' }
   | { type: 'set-sleep-goal'; minutes: number }
+  | { type: 'add-drink'; id: string; name: string; mg: number; at: number }
+  | { type: 'update-drink'; id: string; name?: string; mg?: number; at?: number }
+  | { type: 'delete-drink'; id: string }
+  | { type: 'set-caffeine-limit'; mg: number }
   | { type: 'replace'; state: State };
 
 const COLOR = /^#[0-9A-Fa-f]{6}$/;
@@ -183,6 +187,34 @@ export function reducer(original: State, action: Action): State {
       const minutes = Math.round(action.minutes);
       if (!(minutes >= MIN_SLEEP_GOAL && minutes <= MAX_SLEEP_GOAL) || minutes === state.sleepGoal) return state;
       return { ...state, sleepGoal: minutes };
+    }
+    case 'add-drink': {
+      const drinks = state.drinks ?? [];
+      if (drinks.some((d) => d.id === action.id)) return state;
+      const drink = parseDrink({ id: action.id, name: action.name, mg: action.mg, at: action.at });
+      if (!drink) return state;
+      return { ...state, drinks: [...drinks, drink] };
+    }
+    case 'update-drink': {
+      const drinks = state.drinks ?? [];
+      const index = drinks.findIndex((d) => d.id === action.id);
+      if (index < 0) return state;
+      const old = drinks[index];
+      const drink = parseDrink({ ...old, ...Object.fromEntries(Object.entries({ name: action.name, mg: action.mg, at: action.at }).filter(([, v]) => v !== undefined)) });
+      if (!drink || (drink.name === old.name && drink.mg === old.mg && drink.at === old.at)) return state;
+      const next = drinks.slice();
+      next[index] = drink;
+      return { ...state, drinks: next };
+    }
+    case 'delete-drink': {
+      const drinks = state.drinks ?? [];
+      if (!drinks.some((d) => d.id === action.id)) return state;
+      return { ...state, drinks: drinks.filter((d) => d.id !== action.id) };
+    }
+    case 'set-caffeine-limit': {
+      const mg = Math.round(action.mg);
+      if (!(mg >= MIN_CAFFEINE_LIMIT && mg <= MAX_CAFFEINE_LIMIT) || mg === state.caffeineLimit) return state;
+      return { ...state, caffeineLimit: mg };
     }
     case 'replace':
       return action.state;

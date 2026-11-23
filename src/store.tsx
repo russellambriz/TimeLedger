@@ -31,6 +31,10 @@ type StoreApi = {
   stopSleep: (endAt?: number) => Session | null;
   discardSleep: () => void;
   setSleepGoal: (minutes: number) => void;
+  addDrink: (input: { name: string; mg: number; at?: number }) => boolean;
+  updateDrink: (id: string, patch: { name?: string; mg?: number; at?: number }) => boolean;
+  deleteDrink: (id: string) => void;
+  setCaffeineLimit: (mg: number) => void;
   /** Current state, readable outside React renders (used by sync). */
   getState: () => State;
   /** Apply a merged state from the cloud without treating it as a local change. */
@@ -194,6 +198,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     setSleepGoal: (minutes) => {
       dispatch({ type: 'set-sleep-goal', minutes });
+    },
+    addDrink: ({ name, mg, at }) => {
+      const ok = dispatch({ type: 'add-drink', id: uid(), name, mg, at: at ?? Date.now() }) !== null;
+      if (ok) notify(`Added ${name.trim()} · ${Math.round(mg)} mg`);
+      return ok;
+    },
+    updateDrink: (id, patch) => {
+      const next = reducer(ref.current, { type: 'update-drink', id, ...patch });
+      if (next === ref.current) return true;
+      return commit(next);
+    },
+    deleteDrink: (id) => {
+      dispatch({ type: 'delete-drink', id });
+    },
+    setCaffeineLimit: (mg) => {
+      dispatch({ type: 'set-caffeine-limit', mg });
     },
     getState: () => ref.current,
     applySynced: (next) => {

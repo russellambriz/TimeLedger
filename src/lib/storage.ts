@@ -1,8 +1,11 @@
 import { defaultState, migrateFocus, migrateHomework } from './defaults';
-import type { ActiveTimer, Category, Session, SleepTimer, State } from '../types';
+import type { ActiveTimer, Category, Drink, Session, SleepTimer, State } from '../types';
 
 export const MIN_SLEEP_GOAL = 240;
 export const MAX_SLEEP_GOAL = 720;
+export const MIN_CAFFEINE_LIMIT = 50;
+export const MAX_CAFFEINE_LIMIT = 1000;
+export const MAX_DRINK_MG = 1000;
 
 export const STORAGE_KEY = 'timeledger.v1';
 
@@ -86,10 +89,38 @@ export function parseState(input: unknown): State | null {
       ? Math.round(input.sleepGoal)
       : undefined;
 
+  const drinks: Drink[] = [];
+  if (Array.isArray(input.drinks)) {
+    const seenDrinks = new Set<string>();
+    for (const raw of input.drinks.slice(0, 50000)) {
+      const drink = parseDrink(raw);
+      if (drink && !seenDrinks.has(drink.id)) {
+        drinks.push(drink);
+        seenDrinks.add(drink.id);
+      }
+    }
+  }
+  const caffeineLimit =
+    typeof input.caffeineLimit === 'number' && input.caffeineLimit >= MIN_CAFFEINE_LIMIT && input.caffeineLimit <= MAX_CAFFEINE_LIMIT
+      ? Math.round(input.caffeineLimit)
+      : undefined;
+
   const base: State = { version: 1, categories, sessions, active, lastCategoryId };
+  if (drinks.length) base.drinks = drinks;
+  if (caffeineLimit !== undefined) base.caffeineLimit = caffeineLimit;
   if (sleep) base.sleep = sleep;
   if (sleepGoal !== undefined) base.sleepGoal = sleepGoal;
   return migrateHomework(migrateFocus(base));
+}
+
+/** Validate one drink from storage, a backup, or the cloud. */
+export function parseDrink(raw: unknown): Drink | null {
+  if (!isRecord(raw)) return null;
+  const { id, name, mg, at } = raw;
+  if (typeof id !== 'string' || !id || typeof name !== 'string' || !name.trim()) return null;
+  if (typeof mg !== 'number' || !Number.isFinite(mg) || mg <= 0 || mg > MAX_DRINK_MG) return null;
+  if (typeof at !== 'number' || !Number.isFinite(at) || at < Date.UTC(2000, 0, 1)) return null;
+  return { id, name: name.trim().slice(0, 40), mg: Math.round(mg), at };
 }
 
 export function loadState(storage: Pick<Storage, 'getItem'> = localStorage): State {
