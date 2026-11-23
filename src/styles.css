@@ -1177,3 +1177,5 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 .drink-chip.would-exceed { border-color: #d27a6866; }
 .drink-chip.would-exceed small { color: var(--danger); }
 .drink-chip em { font-style: normal; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--danger); }
+
+.drink-chip em.is-recent { color: var(--gold); }
