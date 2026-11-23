@@ -64,8 +64,9 @@ describe('caffeine math', () => {
 describe('quick picks', () => {
   it('starts with the standard list, Celsius included', () => {
     const names = quickDrinks(defaultState()).map((d) => d.name);
-    expect(names).toHaveLength(8);
-    expect(names.slice(0, 2)).toEqual(['Coffee', 'Celsius']);
+    expect(names).toHaveLength(10);
+    expect(names.slice(0, 3)).toEqual(['Coffee', 'Celsius', 'Red Bull 12\u00a0oz']);
+    expect(names).toContain('Soda');
   });
 
   it('puts recent drinks first, including custom ones, without duplicates', () => {
@@ -79,8 +80,8 @@ describe('quick picks', () => {
       ['Celsius', true],
       ['Coffee', true],
     ]);
-    expect(picks).toHaveLength(8);
-    expect(new Set(picks.map((d) => d.name)).size).toBe(8);
+    expect(picks).toHaveLength(11);
+    expect(new Set(picks.map((d) => d.name)).size).toBe(11);
   });
 });
 

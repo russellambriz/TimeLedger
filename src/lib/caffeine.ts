@@ -11,6 +11,7 @@ export const BEDTIME_CAUTION_MG = 50;
 export const DRINK_PRESETS: readonly { name: string; mg: number }[] = [
   { name: 'Coffee', mg: 95 },
   { name: 'Celsius', mg: 200 },
+  { name: 'Red Bull 12\u00a0oz', mg: 114 },
   { name: 'Espresso', mg: 63 },
   { name: 'Cold brew', mg: 200 },
   { name: 'Black tea', mg: 47 },
@@ -24,7 +25,7 @@ export const DRINK_PRESETS: readonly { name: string; mg: number }[] = [
  * Quick-pick drinks: what you drank most recently comes first (including your
  * own custom drinks), then the standard list fills the rest.
  */
-export function quickDrinks(state: State, count = 8): { name: string; mg: number; recent: boolean }[] {
+export function quickDrinks(state: State, count = 12): { name: string; mg: number; recent: boolean }[] {
   const out: { name: string; mg: number; recent: boolean }[] = [];
   const seen = new Set<string>();
   const key = (name: string) => name.trim().toLowerCase();
