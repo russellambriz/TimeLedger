@@ -5,6 +5,8 @@ import { reducer, type Action } from './lib/reducer';
 import { loadState, saveState, STORAGE_KEY } from './lib/storage';
 import type { Session, State } from './types';
 import { SLEEP_CATEGORY } from './lib/defaults';
+import { caffeineLimit, drinksOn } from './lib/caffeine';
+import { startOfDay } from './lib/time';
 
 type StoreApi = {
   state: State;
@@ -60,13 +62,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const listeners = useRef(new Set<(prev: State, next: State) => void>());
   ref.current = state;
 
-  const notify = (message: string) => {
+  const notify = (message: string, duration = 2400) => {
     setToast(message);
     if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => {
       setToast(null);
       toastTimer.current = null;
-    }, 2400);
+    }, duration);
   };
 
   const commit = (next: State) => {
@@ -200,9 +202,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'set-sleep-goal', minutes });
     },
     addDrink: ({ name, mg, at }) => {
-      const ok = dispatch({ type: 'add-drink', id: uid(), name, mg, at: at ?? Date.now() }) !== null;
-      if (ok) notify(`Added ${name.trim()} · ${Math.round(mg)} mg`);
-      return ok;
+      const when = at ?? Date.now();
+      const next = dispatch({ type: 'add-drink', id: uid(), name, mg, at: when });
+      if (!next) return false;
+      const day = startOfDay(when);
+      const total = drinksOn(next, day).reduce((sum, d) => sum + d.mg, 0);
+      const limit = caffeineLimit(next);
+      const before = total - Math.round(mg);
+      if (total > limit && before <= limit) {
+        notify(`⚠ Over your ${limit} mg daily limit · ${total} mg ${day === startOfDay(Date.now()) ? 'today' : 'that day'}`, 5000);
+      } else if (total > limit) {
+        notify(`⚠ Still over your limit · ${total} of ${limit} mg`, 5000);
+      } else {
+        notify(`Added ${name.trim()} · ${Math.round(mg)} mg · ${total} of ${limit} mg`);
+      }
+      return true;
     },
     updateDrink: (id, patch) => {
       const next = reducer(ref.current, { type: 'update-drink', id, ...patch });

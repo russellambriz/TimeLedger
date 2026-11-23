@@ -19,7 +19,9 @@ const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const mg = (value: number) => `${Math.round(value)} mg`;
 
 export function CaffeineScreen() {
-  const { state, now, addDrink, setCaffeineLimit } = useStore();
+  const { state, now: tick, addDrink, setCaffeineLimit } = useStore();
+  // The shared clock ticks every 30 s; use the real time so a drink just added counts right away.
+  const now = Math.max(tick, Date.now());
   const [editing, setEditing] = useState<Drink | 'new' | null>(null);
   const limit = caffeineLimit(state);
   const today = useMemo(() => drinksOn(state, startOfDay(now)), [state, now]);
@@ -74,6 +76,22 @@ export function CaffeineScreen() {
       </div>
 
       <div className="caffeine-body">
+        {over ? (
+          <div className="caffeine-alert is-over" role="alert">
+            <strong>⚠ Over your daily limit</strong>
+            <span>
+              {mg(todayTotal)} today, {mg(todayTotal - limit)} more than your {mg(limit)} limit. Consider switching to water
+              or decaf for the rest of the day.
+            </span>
+          </div>
+        ) : todayTotal >= limit * 0.8 ? (
+          <div className="caffeine-alert" role="status">
+            <strong>Close to your limit</strong>
+            <span>
+              {mg(todayTotal)} of {mg(limit)} today. Only {mg(limit - todayTotal)} to go.
+            </span>
+          </div>
+        ) : null}
         <div className="limit-meter" role="img" aria-label={`${mg(todayTotal)} of ${mg(limit)} daily limit`}>
           <span className={over ? 'is-over' : ''} style={{ width: `${Math.min(100, (todayTotal / limit) * 100)}%` }} />
         </div>
@@ -85,12 +103,22 @@ export function CaffeineScreen() {
 
         <h3 className="section-title">Add a drink</h3>
         <div className="drink-grid">
-          {DRINK_PRESETS.map((preset) => (
-            <button key={preset.name} type="button" className="drink-chip" onClick={() => addDrink(preset)}>
-              <span>{preset.name}</span>
-              <small>{preset.mg} mg</small>
-            </button>
-          ))}
+          {DRINK_PRESETS.map((preset) => {
+            const exceeds = todayTotal + preset.mg > limit;
+            return (
+              <button
+                key={preset.name}
+                type="button"
+                className={exceeds ? 'drink-chip would-exceed' : 'drink-chip'}
+                aria-label={`Add ${preset.name}, ${preset.mg} mg${exceeds ? ', puts you over your daily limit' : ''}`}
+                onClick={() => addDrink(preset)}
+              >
+                <span>{preset.name}</span>
+                <small>{preset.mg} mg</small>
+                {exceeds && <em>Over limit</em>}
+              </button>
+            );
+          })}
         </div>
         <button type="button" className="text-btn" onClick={() => setEditing('new')}>
           Custom amount or earlier time
