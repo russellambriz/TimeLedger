@@ -3,9 +3,9 @@ import {
   BEDTIME_CAUTION_MG,
   caffeineLimit,
   dailyCaffeine,
-  DRINK_PRESETS,
   drinksOn,
   inSystem,
+  quickDrinks,
   tonightsBedtime,
 } from '../lib/caffeine';
 import { formatTime } from '../lib/format';
@@ -103,7 +103,7 @@ export function CaffeineScreen() {
 
         <h3 className="section-title">Add a drink</h3>
         <div className="drink-grid">
-          {DRINK_PRESETS.map((preset) => {
+          {quickDrinks(state).map((preset) => {
             const exceeds = todayTotal + preset.mg > limit;
             return (
               <button
@@ -115,6 +115,7 @@ export function CaffeineScreen() {
               >
                 <span>{preset.name}</span>
                 <small>{preset.mg} mg</small>
+                {preset.recent && !exceeds && <em className="is-recent">Recent</em>}
                 {exceeds && <em>Over limit</em>}
               </button>
             );

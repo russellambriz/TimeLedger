@@ -10,6 +10,7 @@ export const BEDTIME_CAUTION_MG = 50;
 
 export const DRINK_PRESETS: readonly { name: string; mg: number }[] = [
   { name: 'Coffee', mg: 95 },
+  { name: 'Celsius', mg: 200 },
   { name: 'Espresso', mg: 63 },
   { name: 'Cold brew', mg: 200 },
   { name: 'Black tea', mg: 47 },
@@ -18,6 +19,30 @@ export const DRINK_PRESETS: readonly { name: string; mg: number }[] = [
   { name: 'Energy drink', mg: 160 },
   { name: 'Soda', mg: 35 },
 ];
+
+/**
+ * Quick-pick drinks: what you drank most recently comes first (including your
+ * own custom drinks), then the standard list fills the rest.
+ */
+export function quickDrinks(state: State, count = 8): { name: string; mg: number; recent: boolean }[] {
+  const out: { name: string; mg: number; recent: boolean }[] = [];
+  const seen = new Set<string>();
+  const key = (name: string) => name.trim().toLowerCase();
+  const recent = (state.drinks ?? []).slice().sort((a, b) => b.at - a.at);
+  for (const d of recent) {
+    if (out.length >= count) break;
+    if (seen.has(key(d.name))) continue;
+    seen.add(key(d.name));
+    out.push({ name: d.name, mg: d.mg, recent: true });
+  }
+  for (const preset of DRINK_PRESETS) {
+    if (out.length >= count) break;
+    if (seen.has(key(preset.name))) continue;
+    seen.add(key(preset.name));
+    out.push({ ...preset, recent: false });
+  }
+  return out;
+}
 
 export const caffeineLimit = (state: State) => state.caffeineLimit ?? DEFAULT_CAFFEINE_LIMIT;
 

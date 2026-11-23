@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dailyCaffeine, drinksOn, inSystem, tonightsBedtime } from './caffeine';
+import { dailyCaffeine, drinksOn, inSystem, quickDrinks, tonightsBedtime } from './caffeine';
 import { defaultState } from './defaults';
 import { reducer } from './reducer';
 import { parseState } from './storage';
@@ -60,3 +60,27 @@ describe('caffeine math', () => {
     expect(tonightsBedtime(withSleep, at(24, 0, 30))).toBe(at(24, 0));
   });
 });
+
+describe('quick picks', () => {
+  it('starts with the standard list, Celsius included', () => {
+    const names = quickDrinks(defaultState()).map((d) => d.name);
+    expect(names).toHaveLength(8);
+    expect(names.slice(0, 2)).toEqual(['Coffee', 'Celsius']);
+  });
+
+  it('puts recent drinks first, including custom ones, without duplicates', () => {
+    let s = defaultState();
+    s = reducer(s, { type: 'add-drink', id: '1', name: 'Coffee', mg: 95, at: at(22, 8) });
+    s = reducer(s, { type: 'add-drink', id: '2', name: 'Celsius', mg: 200, at: at(23, 9) });
+    s = reducer(s, { type: 'add-drink', id: '3', name: 'Yerba mate', mg: 80, at: at(23, 14) });
+    const picks = quickDrinks(s);
+    expect(picks.slice(0, 3).map((d) => [d.name, d.recent])).toEqual([
+      ['Yerba mate', true],
+      ['Celsius', true],
+      ['Coffee', true],
+    ]);
+    expect(picks).toHaveLength(8);
+    expect(new Set(picks.map((d) => d.name)).size).toBe(8);
+  });
+});
+
