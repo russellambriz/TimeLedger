@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { nextColor, PALETTE, SLEEP_CATEGORY } from '../lib/defaults';
 import { useStore } from '../store';
 import { Sheet } from './Sheet';
+import { CategoryMark } from './CategoryMark';
 
 export function CategorySheet({ onClose }: { onClose: () => void }) {
   const { state, setCategory, addCategory, updateCategory, removeCategory, restoreCategory } = useStore();
@@ -53,7 +54,7 @@ export function CategorySheet({ onClose }: { onClose: () => void }) {
             editing ? (
               <li key={category.id} className="cat-edit">
                 <div className="cat-edit-row">
-                  <span className="dot" style={{ background: category.color }} />
+                  <CategoryMark id={category.id} color={category.color} />
                   <input
                     aria-label={`Rename ${category.name}`}
                     value={drafts[category.id] ?? category.name}
@@ -93,7 +94,7 @@ export function CategorySheet({ onClose }: { onClose: () => void }) {
             ) : (
               <li key={category.id}>
                 <button type="button" className="cat-row" onClick={() => choose(category.id)}>
-                  <span className="dot" style={{ background: category.color }} />
+                  <CategoryMark id={category.id} color={category.color} />
                   <span>{category.name}</span>
                   {selected === category.id && <span className="check">Selected</span>}
                 </button>
@@ -108,7 +109,7 @@ export function CategorySheet({ onClose }: { onClose: () => void }) {
             .filter((category) => category.archived && category.id !== SLEEP_CATEGORY.id)
             .map((category) => (
               <div key={category.id} className="cat-edit-row">
-                <span className="dot" style={{ background: category.color }} />
+                <CategoryMark id={category.id} color={category.color} />
                 <span className="removed-name">{category.name}</span>
                 <button type="button" className="text-btn" onClick={() => restoreCategory(category.id)}>
                   Restore

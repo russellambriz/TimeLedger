@@ -9,11 +9,14 @@ export const isHomework = (id: string) => id === 'homework' || HOMEWORK_SUBJECTS
 export const SLEEP_CATEGORY: Category = { id: 'sleep', name: 'Sleep', color: '#7C90C0' };
 export const DEFAULT_SLEEP_GOAL = 480;
 
+export const BIBLE_STUDY: Category = { id: 'bible-study', name: 'Bible Study', color: '#E0C48A' };
+
 export const DEFAULT_CATEGORIES: readonly Category[] = [
   { id: 'focus', name: 'Focus', color: '#D4B896' },
   { id: 'reading', name: 'Reading', color: '#8CA99B' },
   { id: 'homework', name: 'Homework', color: '#9BAED0' },
   { id: 'deep-work', name: 'Deep Work', color: '#BAA0C7' },
+  BIBLE_STUDY,
   ...HOMEWORK_SUBJECTS,
 ];
 
@@ -73,6 +76,12 @@ export function migrateFocus(state: State): State {
   if (!state.categories.some(c => LEGACY_CATEGORIES.has(c.id))) return state;
   return { ...state, categories: [...DEFAULT_CATEGORIES.filter(c => !state.categories.some(old => old.id === c.id)), ...state.categories],
     lastCategoryId: LEGACY_CATEGORIES.has(state.lastCategoryId) ? 'focus' : state.lastCategoryId };
+}
+
+/** Adds Bible Study for existing users. Removing it archives it, so it is never re-added. */
+export function migrateBibleStudy(state: State): State {
+  if (state.categories.some((c) => c.id === BIBLE_STUDY.id)) return state;
+  return { ...state, categories: [...state.categories, { ...BIBLE_STUDY }] };
 }
 
 export function migrateHomework(state: State): State {

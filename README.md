@@ -9,7 +9,7 @@ A quiet, one-tap focus tracker for reading, homework, and deep work.
 ## Use
 
 - Tap **Focus** to start immediately in your last activity. Tap **Stop & save** to finish and save the session.
-- Choose Reading, Homework, Deep Work, or a custom activity. Changing the activity while running relabels the entire current session.
+- Choose Reading, Homework, Deep Work, Bible Study (marked with a cross), or a custom activity. Changing the activity while running relabels the entire current session.
 - Today, this week, and this month accumulate automatically, including the running session.
 - **Progress** shows daily, weekly, and monthly charts with activity breakdowns. Tap a daily bar or choose any date in the focus timeline to see when each session happened. Tap a session for its exact start, end, duration, and time zone. Overnight sessions appear on both days, counting only the time on each day.
 - **Sleep**: tap the moon at lights out and again when you wake. See last night, your 7-night average, a nightly goal (4–12 h, adjustable), and the last 7 nights against that goal. Add or fix a night you forgot to tap. If the timer runs over 16 hours, Hourwell asks you to check the wake time. Sleep is kept out of focus totals, and starting a focus session stops the sleep timer (and vice versa).

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatDuration } from '../lib/format';
+import { CategoryMark } from './CategoryMark';
 
 export type ChartSegment = {
   id: string;
@@ -197,7 +198,7 @@ export function StackedChart({
           {tipBar.segments.length === 0 && <div className="tip-empty">No time</div>}
           {tipBar.segments.map((segment) => (
             <div key={segment.id} className="tip-row">
-              <span className="dot" style={{ background: segment.color }} />
+              <CategoryMark id={segment.id} color={segment.color} />
               <span>{segment.name}</span>
               <span>{formatDuration(segment.ms)}</span>
             </div>

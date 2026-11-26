@@ -8,6 +8,7 @@ import type { State } from '../types';
 import { StackedChart, type ChartBar } from './StackedChart';
 import { FocusTimeline } from './FocusTimeline';
 import { StatRow } from './StatRow';
+import { CategoryMark } from './CategoryMark';
 
 const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -131,7 +132,7 @@ export function InsightsScreen() {
                   const percentLabel = percent === 0 && segment.ms > 0 ? '<1%' : `${percent}%`;
                   return (
                     <li key={segment.id}>
-                      <span className="dot" style={{ background: segment.color }} />
+                      <CategoryMark id={segment.id} color={segment.color} />
                       <span className="break-name">
                         {segment.name}
                         <span className="meter" aria-hidden="true">

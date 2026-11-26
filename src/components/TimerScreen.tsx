@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { selectedCategory, LEGACY_CATEGORIES, HOMEWORK_SUBJECTS, isHomework } from '../lib/defaults';
+import { selectedCategory, LEGACY_CATEGORIES, HOMEWORK_SUBJECTS, isHomework, BIBLE_STUDY } from '../lib/defaults';
 import { formatClock } from '../lib/format';
 import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
@@ -9,6 +9,7 @@ import { HomeworkSheet } from './HomeworkSheet';
 import { StatRow } from './StatRow';
 import { CloudSyncSheet, statusLabel } from './CloudSyncSheet';
 import { useSync } from '../sync';
+import { CategoryMark, CrossIcon } from './CategoryMark';
 
 export function TimerScreen() {
   const { state, now, start, stop, discard, setCategory } = useStore();
@@ -61,14 +62,14 @@ export function TimerScreen() {
           aria-label={`Category: ${category.name}. Change category`}
           onClick={() => setOpen(true)}
         >
-          <span className="dot" style={{ background: category.color }} />
+          <CategoryMark id={category.id} color={category.color} />
           <span className="name">{category.name}</span>
           <svg viewBox="0 0 12 12" aria-hidden="true">
             <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
         </button>
         <div className="quick-categories" aria-label="Focus activity">
-          {state.categories.filter(c => !c.archived && !LEGACY_CATEGORIES.has(c.id) && !HOMEWORK_SUBJECTS.some(subject => subject.id === c.id)).slice(0, 4).map(c => <button key={c.id} aria-pressed={category.id === c.id || (c.id === 'homework' && isHomework(category.id))} onClick={() => c.id === 'homework' ? setHomeworkOpen(true) : setCategory(c.id)}>{c.name}</button>)}
+          {state.categories.filter(c => !c.archived && !LEGACY_CATEGORIES.has(c.id) && !HOMEWORK_SUBJECTS.some(subject => subject.id === c.id)).slice(0, 5).map(c => <button key={c.id} aria-pressed={category.id === c.id || (c.id === 'homework' && isHomework(category.id))} onClick={() => c.id === 'homework' ? setHomeworkOpen(true) : setCategory(c.id)}>{c.id === BIBLE_STUDY.id && <CrossIcon />}{c.name}</button>)}
         </div>
         <p className="timer-caption">{running ? 'Tap once to finish. Your time is saved automatically.' : 'One tap to start. One tap to stop and save.'}</p>
         {running ? (
