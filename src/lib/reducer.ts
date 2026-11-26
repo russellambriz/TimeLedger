@@ -1,4 +1,4 @@
-import { defaultState, HOMEWORK_SUBJECTS, SLEEP_CATEGORY } from './defaults';
+import { BIBLE_STUDY, defaultState, HOMEWORK_SUBJECTS, SLEEP_CATEGORY } from './defaults';
 import { MAX_CAFFEINE_LIMIT, MAX_SLEEP_GOAL, MIN_CAFFEINE_LIMIT, MIN_SLEEP_GOAL, parseDrink } from './storage';
 import type { State } from '../types';
 
@@ -110,7 +110,7 @@ export function reducer(original: State, action: Action): State {
       const fallback = state.categories.find((item) => !item.archived && item.id !== target.id);
       if (!fallback) return state;
       const usedBySession = state.sessions.some((session) => session.categoryId === target.id);
-      const categories = (usedBySession || HOMEWORK_SUBJECTS.some(c => c.id === target.id))
+      const categories = (usedBySession || target.id === BIBLE_STUDY.id || HOMEWORK_SUBJECTS.some(c => c.id === target.id))
         ? state.categories.map((item) => (item.id === target.id ? { ...item, archived: true } : item))
         : state.categories.filter((item) => item.id !== target.id);
       return {

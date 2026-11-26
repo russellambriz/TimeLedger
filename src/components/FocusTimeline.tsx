@@ -4,6 +4,7 @@ import { lookupCategory } from '../lib/defaults';
 import { formatDuration, toDatetimeLocal } from '../lib/format';
 import { timelineSessions } from '../lib/timeline';
 import { addDays, startOfDay } from '../lib/time';
+import { CategoryMark } from './CategoryMark';
 const dateLabel = (ms: number) => new Date(ms).toLocaleDateString(undefined, {weekday:'short', month:'short',day:'numeric',year:'numeric'});
 const timeLabel = (ms: number) => new Date(ms).toLocaleTimeString(undefined, {hour:'numeric',minute:'2-digit',second:'2-digit'});
 const fullLabel = (ms: number) => new Date(ms).toLocaleString(undefined, {year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'});
@@ -34,7 +35,7 @@ export function FocusTimeline({state, now, initialDay}: {state: State; now: numb
       const category=lookupCategory(state,s.categoryId);
       const label=`${category.name}: ${timeLabel(s.visibleStart)} – ${timeLabel(s.visibleEnd)}, ${formatDuration(s.visibleEnd-s.visibleStart,true)}${s.running ? ', in progress' : ''}`;
       return <button key={s.id} className="timeline-session" aria-label={label} aria-pressed={selectedId === s.id} onClick={() => setSelectedId(s.id)}>
-        <span className="timeline-row-label"><span><i className="dot" style={{background:category.color}} />{category.name}{s.running ? ' · Live' : ''}</span><span>{formatDuration(s.visibleEnd-s.visibleStart,true)}</span></span>
+        <span className="timeline-row-label"><span><CategoryMark id={s.categoryId} color={category.color} />{category.name}{s.running ? ' · Live' : ''}</span><span>{formatDuration(s.visibleEnd-s.visibleStart,true)}</span></span>
         <span className="timeline-track"><span style={{left:`${s.left}%`,width:`${s.width}%`,background:category.color}} /></span>
         <span className="timeline-time">{timeLabel(s.visibleStart)} – {timeLabel(s.visibleEnd)}{s.visibleEnd === end ? ' (next midnight)' : ''}</span>
       </button>;

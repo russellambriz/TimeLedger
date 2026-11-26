@@ -4,6 +4,7 @@ import { formatDuration, formatRange, formatTime, fromDatetimeLocal, toDatetimeL
 import { useStore } from '../store';
 import type { Session } from '../types';
 import { Sheet } from './Sheet';
+import { CategoryMark } from './CategoryMark';
 
 // A session longer than this almost always means a wrong date.
 const LONG_SESSION = 16 * 3_600_000;
@@ -89,7 +90,7 @@ export function SessionSheet({
     <Sheet title={title ?? (session ? 'Edit session' : 'Add session')} onClose={onClose}>
       {session && (
         <div className="session-summary" role="status">
-          <span className="dot" style={{ background: lookupCategory(state, session.categoryId).color }} />
+          <CategoryMark id={session.categoryId} color={lookupCategory(state, session.categoryId).color} />
           <div>
             <p className="session-summary-title">
               {lookupCategory(state, session.categoryId).name}
@@ -110,7 +111,7 @@ export function SessionSheet({
             className={category.id === categoryId ? 'chip is-on' : 'chip'}
             onClick={() => setCategoryId(category.id)}
           >
-            <span className="dot" style={{ background: category.color }} />
+            <CategoryMark id={category.id} color={category.color} />
             {category.name}
           </button>
         ))}

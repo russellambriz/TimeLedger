@@ -1,4 +1,4 @@
-import { defaultState, migrateFocus, migrateHomework } from './defaults';
+import { defaultState, migrateBibleStudy, migrateFocus, migrateHomework } from './defaults';
 import type { ActiveTimer, Category, Drink, Session, SleepTimer, State } from '../types';
 
 export const MIN_SLEEP_GOAL = 240;
@@ -110,7 +110,7 @@ export function parseState(input: unknown): State | null {
   if (caffeineLimit !== undefined) base.caffeineLimit = caffeineLimit;
   if (sleep) base.sleep = sleep;
   if (sleepGoal !== undefined) base.sleepGoal = sleepGoal;
-  return migrateHomework(migrateFocus(base));
+  return migrateBibleStudy(migrateHomework(migrateFocus(base)));
 }
 
 /** Validate one drink from storage, a backup, or the cloud. */

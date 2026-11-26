@@ -6,6 +6,7 @@ import { useStore } from '../store';
 import type { Session } from '../types';
 import { DataSheet } from './DataSheet';
 import { SessionSheet } from './SessionSheet';
+import { CategoryMark } from './CategoryMark';
 
 export function HistoryScreen({ onShowTimer }: { onShowTimer: () => void }) {
   const { state, now, discard } = useStore();
@@ -91,7 +92,7 @@ export function HistoryScreen({ onShowTimer }: { onShowTimer: () => void }) {
                   data-testid={`session-${row.session.id}`}
                   onClick={() => setEditing(row.session)}
                 >
-                  <span className="dot" style={{ background: category.color }} />
+                  <CategoryMark id={row.session.categoryId} color={category.color} />
                   <span className="session-main">
                     <span className="session-cat">{category.name}</span>
                     <span className="session-when">{formatRange(row.start, row.end)}</span>
