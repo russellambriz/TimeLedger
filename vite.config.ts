@@ -2,8 +2,12 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Shown in the Sync screen so you can tell which version a device is running.
+const APP_VERSION = `${new Date().toISOString().slice(0, 10)} · ${(process.env.GITHUB_SHA ?? 'dev').slice(0, 7)}`;
+
 export default defineConfig({
   base: '/TimeLedger/',
+  define: { __APP_VERSION__: JSON.stringify(APP_VERSION) },
   plugins: [
     react(),
     VitePWA({

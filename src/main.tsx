@@ -9,6 +9,9 @@ import { App } from './App';
 import { StoreProvider } from './store';
 import { SyncProvider } from './sync';
 import './styles.css';
+import { keepAppUpdated } from './lib/updates';
+
+keepAppUpdated();
 
 const root = document.getElementById('root');
 if (root) {

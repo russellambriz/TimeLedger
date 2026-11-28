@@ -113,6 +113,7 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
           Sign out of this device
         </button>
         <p className="quiet">Signing out keeps your sessions on this device. Sign in again any time to resume syncing.</p>
+        <p className="quiet app-version">Hourwell version {__APP_VERSION__}</p>
       </Sheet>
     );
   }
@@ -262,6 +263,7 @@ export function CloudSyncSheet({ onClose }: { onClose: () => void }) {
           </div>
         </form>
       )}
+      <p className="quiet app-version">Hourwell version {__APP_VERSION__}</p>
     </Sheet>
   );
 }

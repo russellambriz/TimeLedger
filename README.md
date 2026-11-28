@@ -16,7 +16,7 @@ A quiet, one-tap focus tracker for reading, homework, and deep work.
 - **Caffeine**: tap a drink (coffee, espresso, cold brew, tea, matcha, energy drink, soda) or add a custom amount or earlier time. See today's total against an adjustable daily limit (default 400 mg), an estimate of what's still in your system now and at your usual bedtime (5-hour half-life; bedtime from your Sleep data, else 10:30 PM), today's drinks (tap to edit or delete), and the last 7 days. Estimates are general, not medical advice.
 - **History** lets you add, edit, or delete sessions. Manual entries cannot overlap saved sessions or a running timer.
 - **History → Data** exports a JSON backup or CSV, or imports a JSON backup. Import replaces the device's ledger after confirmation.
-- Install on the home screen for offline use after the first successful load. A running timer survives reloads and closing the app because its start timestamp is saved.
+- Install on the home screen for offline use after the first successful load. Installed copies check for a new version at launch and every time you return to the app, then reload into it automatically (nothing is lost). The version is shown at the bottom of the Sync screen. A running timer survives reloads and closing the app because its start timestamp is saved.
 
 Days and months follow the device's local calendar; weeks start Monday. Sessions crossing midnight, month, or year boundaries are apportioned correctly. Changing devices' time zones changes the calendar grouping.
 
